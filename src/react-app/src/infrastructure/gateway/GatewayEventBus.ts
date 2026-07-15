@@ -1,9 +1,10 @@
-import { SpaceXEventBase } from '@shared-types/events';
-import { GatewayEventListener } from './gateway-even-listener';
+import { GatewayEvent } from 'gateway-contracts';
+import { GatewayEventListener } from './GatewayEventListener';
+import { ConfigService } from '../../config';
 
 export class GatewayEventBus {
 
-    private readonly url = 'http://localhost:3001/api/events';
+    constructor(private readonly config: ConfigService) { }
 
     private source?: EventSource;
 
@@ -11,11 +12,13 @@ export class GatewayEventBus {
 
     connect(): void {
 
+        const API = this.config.settings.gateway.baseUrl;
+
         if (this.source) {
             return;
         }
 
-        this.source = new EventSource(this.url);
+        this.source = new EventSource(`${API}/events`);
 
         this.source.onopen = () => {
             console.log('[GatewayEventBus] Connected');
@@ -29,7 +32,7 @@ export class GatewayEventBus {
 
             try {
 
-                const event = JSON.parse(message.data) as SpaceXEventBase;
+                const event = JSON.parse(message.data) as GatewayEvent;
 
                 console.log('[GatewayEventBus] Received', event.event);
 
@@ -55,7 +58,7 @@ export class GatewayEventBus {
         return () => this.listeners.delete(listener);
     }
 
-    private emit(event: SpaceXEventBase): void {
+    private emit(event: GatewayEvent): void {
 
         for (const listener of this.listeners) {
             listener(event);

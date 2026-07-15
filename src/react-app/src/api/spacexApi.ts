@@ -1,11 +1,15 @@
+import { ConfigService } from "../config";
+
 export interface Launch {
   id: string;
   name: string;
 }
 
-const API = "http://localhost:3001/api";
-
 export async function getLaunch(id: string): Promise<Launch> {
+
+  const config = new ConfigService();
+  const API = config.settings.gateway.baseUrl;
+
   const response = await fetch(`${API}/launch/${id}`);
 
   if (!response.ok) {

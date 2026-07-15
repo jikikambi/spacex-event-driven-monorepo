@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EnrichmentService } from "../../../enrichment/enrichment.service";
-import { GatewayEvent, GatewayEventBase } from "gateway-contracts";
-import { EnrichLaunchEvent, GatewayEventType } from "gateway-contracts";
+import { GatewayEvent, EnrichLaunchEvent, GatewayEventType, GatewayEventBase } from "gateway-contracts";
 
 @Injectable()
 export class EventEnrichmentService {

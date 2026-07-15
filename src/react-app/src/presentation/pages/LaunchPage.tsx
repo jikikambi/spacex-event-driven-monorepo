@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { getLaunch } from "../api/spacexApi";
+import { getLaunch } from "../../api/spacexApi";
 
 export default function LaunchPage() {
+
   const [launch, setLaunch] = useState<any>();
 
   useEffect(() => {

@@ -1,0 +1,1 @@
+export const DEFAULT_URL = { RABBITMQ_DEFAULT_URL: 'amqp://localhost' } as const;

@@ -1,0 +1,26 @@
+# dependencies
+
+# Nx
+.nx
+dist
+
+# logs
+*.log
+
+# git
+.git
+.gitignore
+
+# environment
+.env
+.env.*
+
+# Angular cache (CRITICAL FIX)
+.angular
+
+# Vite / frontend caches
+node_modules/.vite
+node_modules/.cache
+
+# general
+node_modules

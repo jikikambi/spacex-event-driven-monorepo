@@ -1,15 +1,16 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './assets/App.css'
-import './assets/tailwind.css';
-import App from './App.tsx'
-import { Provider } from 'react-redux'
-import { store } from './store/index.ts'
+import { StrictMode } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import * as ReactDOM from 'react-dom/client';
+import App from './app/app';
 
-createRoot(document.getElementById('root')!).render(
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+
+root.render(
   <StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </StrictMode>,
-)
+    <BrowserRouter>
+      <App/>
+    </BrowserRouter>
+  </StrictMode>
+);

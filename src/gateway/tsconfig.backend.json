@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../dist/gateway",
-    "typeRoots": ["./types", "../../node_modules/@types"]
-  },
-  "include": ["./**/*", "./types/**/*", "../../shared/types/**/*", "../../shared/utils/**/*"],
-  "exclude": ["../../dist", "node_modules"]
-}

@@ -1,0 +1,111 @@
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PinoLogger } from "nestjs-pino";
+import launches from '../../mock-data/launches.json';
+import rockets from '../../mock-data/rockets.json';
+import payloads from '../../mock-data/payloads.json';
+import ships from '../../mock-data/ships.json';
+import launchpads from '../../mock-data/launchpads.json';
+import { ISpaceXProvider } from "./spacex.provider";
+import { Launch, Launchpad, Payload, Rocket, Ship } from "spacex-types";
+import { TelemetryContextService } from "../../observability/logging/telemetry-context.service";
+import { RequestMetadataService } from "../../common/middleware/request-metadata.service";
+
+@Injectable()
+export class SpaceXMockService implements ISpaceXProvider {
+
+    constructor(private readonly logger: PinoLogger,
+        private readonly telctxSvc: TelemetryContextService,
+        private readonly metadataSvc: RequestMetadataService) {
+        this.logger.setContext(SpaceXMockService.name);
+    }
+
+    async fetchLaunch(id: string): Promise<Launch> {
+
+        const context = this.logContext('fetchLaunch');
+
+        this.logger.info(
+            {
+                ...context
+            }, 'Fetching launch from SpaceX');
+
+        try {
+
+            const launch = this.launchMap.get(id);
+
+            if (!launch) {
+                throw new NotFoundException(`Mock launch '${id}' not found`);
+            }
+
+            const cloned = structuredClone(launch);
+
+            return cloned;
+        }
+        catch (error) {
+            this.logger.error(
+                {
+                    ...context,
+                    error: error,
+                    message: error instanceof Error ? error.message : String(error),
+                }, 'SpaceX Mock request failed');
+
+            throw error;
+        }
+    }
+
+    async fetchLaunchpad(id: string): Promise<Launchpad | null> {
+
+        this.logger.debug({ id }, 'Loading mock launchpad');
+
+        return (this.launchpadMap.get(id) ?? null);
+    }
+
+    async fetchRocket(id: string): Promise<Rocket | null> {
+
+        this.logger.debug({ id }, 'Loading mock rocket');
+
+        return (this.rocketMap.get(id) ?? null);
+    }
+
+    async fetchPayloads(ids: string[]): Promise<Payload[]> {
+
+        if (!ids.length) {
+            return [];
+        }
+
+        this.logger.debug({ count: ids.length }, 'Loading mock payloads');
+
+        return (payloads as Payload[])
+            .filter(x => ids.includes(x.id))
+            .map(x => structuredClone(x));
+    }
+
+    async fetchShips(ids: string[]): Promise<Ship[]> {
+
+        if (!ids.length) {
+            return [];
+        }
+
+        this.logger.debug({ count: ids.length }, 'Loading mock ships');
+
+        return (ships as Ship[])
+            .filter(x => ids.includes(x.id))
+            .map(x => structuredClone(x));
+    }
+
+    private readonly launchMap = new Map((launches as Launch[]).map(x => [x.id, x]));
+
+    private readonly rocketMap = new Map((rockets as Rocket[]).map(x => [x.id, x]));
+
+    private readonly launchpadMap = new Map((launchpads as Launchpad[]).map(x => [x.id, x]));
+
+    private logContext(operation: string) {
+
+        return {
+            correlationId: this.metadataSvc.correlationId,
+            traceId: this.telctxSvc.traceId,
+            spanId: this.telctxSvc.spanId,
+            component: 'spacex',
+            operation,
+        };
+    }
+}

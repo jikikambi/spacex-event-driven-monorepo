@@ -1,0 +1,50 @@
+import { Injectable } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
+import { MongoService } from '../../database/mongo/mongo.service';
+import { RedisService } from '../../database/redis/redis.service';
+import { GatewayEvent, GatewayEventBase } from 'gateway-contracts';
+
+@Injectable()
+export class EventPublisherService {
+
+    constructor(private readonly mongoService: MongoService,
+        private readonly redisService: RedisService,
+        private readonly logger: PinoLogger) {
+        this.logger.setContext(EventPublisherService.name);
+    }
+
+    /**
+     * Publish an event:
+     * - Persist to MongoDB (event log / audit trail)
+     * - Publish to Redis (real-time fanout)
+     */
+    // async publish(event: GatewayEventBase): Promise<void> {
+    async publish(event: GatewayEvent): Promise<void> {
+
+        try {
+
+            await this.persist(event);
+
+            await this.redisService.getClient().publish('events', JSON.stringify(event));
+
+            this.logger.info({ event: event.event }, '[EventPublisher] Published event');
+        }
+        catch (error) {
+
+            this.logger.error({ error }, '[EventPublisher] Failed to publish event');
+
+            throw error;
+        }
+    }
+
+    /**
+     * Store event in MongoDB (durable log)
+     */
+    // private async persist(event: GatewayEventBase): Promise<void> {
+    private async persist(event: GatewayEvent): Promise<void> {
+
+        const collection = this.mongoService.getCollection('events');
+
+        await collection.insertOne({ ...event, createdAt: new Date() });
+    }
+}

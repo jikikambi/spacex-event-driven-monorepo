@@ -1,0 +1,1 @@
+export const SPACEX_PROVIDER_TOKEN = Symbol('SPACEX_PROVIDER');

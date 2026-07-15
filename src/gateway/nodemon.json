@@ -1,7 +1,0 @@
-{
-  "quiet": true,
-  "watch": ["src", "../../shared/**/*.ts", "../../shared/**/*.json"],
-  "ext": "ts,json",
-  "ignore": ["dist", "node_modules"],
-  "exec": "ts-node -r tsconfig-paths/register -r dotenv/config --project tsconfig.backend.json server.ts"
-}

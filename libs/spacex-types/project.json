@@ -1,0 +1,19 @@
+{
+  "name": "spacex-types",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/spacex-types/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/spacex-types",
+        "main": "libs/spacex-types/src/index.ts",
+        "tsConfig": "libs/spacex-types/tsconfig.lib.json",
+        "assets": ["libs/spacex-types/*.md"]
+      }
+    }
+  }
+}

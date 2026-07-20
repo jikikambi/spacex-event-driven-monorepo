@@ -1,6 +1,8 @@
 export interface AppConfig {
 
     gateway: {
+
+        eventsUrl: string;
         
         baseUrl: string;
 
@@ -21,4 +23,5 @@ export interface AppConfig {
         production: boolean;
 
     };
+    
 }

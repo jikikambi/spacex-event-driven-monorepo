@@ -9,8 +9,11 @@ import { TelemetryContextService } from "../observability/logging/telemetry-cont
 
 @Module({
     imports:[TerminusModule, MongoModule, RedisModule, RabbitMQModule],
+
     controllers: [HealthController],
+
     providers: [TelemetryContextService, HealthService],
+    
     exports: [HealthService]
 })
 export class HealthModule {}

@@ -15,13 +15,16 @@ export class HealthController {
     @Get('live')
     @HealthCheck()
     liveness() {
+
         return this.healthSvc.getHealth();
     }
 
     @Get('ready')
     @HealthCheck()
     readiness() {
+
         const baseUrl = this.config.getOrThrow<string>('SPACEX_MODE');
+        
         return this.healthCheckSvc.check([() => this.http.pingCheck('spacex', baseUrl!),]);
     }
 }

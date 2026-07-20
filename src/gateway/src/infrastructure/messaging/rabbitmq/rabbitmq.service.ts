@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { RabbitMqHealthDto } from './dto/rabbitmq-health.dto';
 import { QUEUE_NAMES } from '../../../common/constants/queue.constants';
 import { DEFAULT_URL } from '../../../common/constants/rabbitmq.constants';
-import { GatewayEvent, GatewayEventBase } from 'gateway-contracts';
+import { GatewayEvent } from 'gateway-contracts';
 
 // export interface BufferedEvent<T extends GatewayEventBase> {
 export interface BufferedEvent<T extends GatewayEvent> {
@@ -24,8 +24,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     private flushTimer?: NodeJS.Timeout;
     private flushIntervalMs = 1000;
     private lastPublishAttempt?: Date;
-
-    // private readonly eventBuffer: BufferedEvent<GatewayEventBase>[] = [];
+    
     private readonly eventBuffer: BufferedEvent<GatewayEvent>[] = [];
 
     constructor(private readonly logger: PinoLogger,
@@ -69,7 +68,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
                 try {
 
-                    this.logger.info(`[RabbitMQ] Connecting (${attempt}/${retries}`);
+                    this.logger.info(`[RabbitMQ] Connecting (${attempt}/${retries})`);
 
                     this.connection = await amqp.connect(this.rabbitUrl);
 
@@ -151,7 +150,6 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         }, this.flushIntervalMs);
     }
 
-    // async publish<T extends GatewayEventBase>(event: T): Promise<void> {
     async publish<T extends GatewayEvent>(event: T): Promise<void> {
 
         this.lastPublishAttempt = new Date();

@@ -16,10 +16,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         this.client = createClient({ url: this.configService.getOrThrow<string>('REDIS_URL') });
 
         this.client.on('connect', () => {
+
             this.logger.info({ url: this.configService.getOrThrow<string>('REDIS_URL') }, '[Redis] Connected');
         });
 
         this.client.on('error', (error: Error) => {
+
             this.logger.error(error, '[Redis] Error.');
         });
 
@@ -27,6 +29,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     async onModuleDestroy() {
+
         await this.disconnect();
     }
 
@@ -38,23 +41,30 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
             await this.client.connect();
         }
         catch (error) {
+
             this.logger.error(error instanceof Error ? error.message ?? error : undefined, '[Redis] Failed to connect');
+
             throw error instanceof Error ? error.message ?? error : undefined;
         }
     }
 
     isConnected(): boolean {
+
         return !!this.client?.isReady;
     }
 
     async disconnect(): Promise<void> {
+
         if (!this.client.isOpen) return;
 
         try {
+
             await this.client.quit();
+
             this.logger.info('[Redis] Connection closed');
         }
         catch (error) {
+
             this.logger.error(error instanceof Error ? error.message ?? error : undefined, '[Redis] Failed to close connection');
         }
     }
@@ -62,6 +72,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     getClient(): RedisClientType<Record<string, never>, Record<string, never>> {
 
         if (!this.client) {
+
             throw new Error('Redis client has not been initialized.');
         }
 
@@ -69,14 +80,17 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     async get(key: string): Promise<string | null> {
+
         return await this.client.get(key) as string | null;
     }
 
     async keys(pattern: string): Promise<string[]> {
+
         return this.client.keys(pattern);
     }
 
     async exists(key: string): Promise<boolean> {
+
         return (await this.client.exists(key)) === 1;
     }
 
@@ -92,7 +106,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
 
         if (ttlSeconds) {
+
             await this.client.set(key, value, { EX: ttlSeconds });
+
             return;
         }
 
@@ -100,6 +116,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     async delete(key: string): Promise<void> {
+        
         await this.client.del(key);
     }
 }

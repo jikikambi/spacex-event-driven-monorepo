@@ -17,35 +17,45 @@ import { RedisModule } from '../infrastructure/database/redis/redis.module';
 import { RabbitMQModule } from '../infrastructure/messaging/rabbitmq/rabbitmq.module';
 import { EventsModule } from '../infrastructure/messaging/events/events.module';
 import { ObservabilityModule } from '../observability/observability.module';
+import { LaunchProducerService } from '../bootstrap/launch-producer.service';
 
 @Module({
   imports: [
     LoggerModule.forRoot({
+
       pinoHttp: {
+
         level:
+
           process.env.NODE_ENV === 'production' ? 'info' : 'debug',
 
         transport: process.env.NODE_ENV !== 'production' ? {
+
           target: 'pino-pretty',
           options: {
             colorize: true,
             singleLine: true,
-          },
+          }
         } : undefined,
         timestamp: pino.stdTimeFunctions.isoTime,
       },
     }),
+
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
+
     HttpModule, HealthModule, ObservabilityModule, MetricsModule, RabbitMQModule, EventsModule, RedisModule, SpaceXModule],
+
   controllers: [AppController],
-  providers: [AppService, GatewayLifecycleService, HttpExceptionFilter, OpenTelemetryService,
+
+  providers: [AppService, LaunchProducerService, GatewayLifecycleService, HttpExceptionFilter, OpenTelemetryService,
     {
       provide: APP_INTERCEPTOR,
       useClass: MetricsInterceptor,
     }],
+    
   exports: []
 })
 export class AppModule { }

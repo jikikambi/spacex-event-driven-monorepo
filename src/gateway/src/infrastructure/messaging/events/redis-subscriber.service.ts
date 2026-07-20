@@ -1,8 +1,8 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { RedisService } from '../../database/redis/redis.service';
 import { SseGatewayService } from '../../sse/sse-gateway.service';
-import { Rocket, Ship, Payload, EnrichedLaunchPayload, GatewayEventBase, GatewayEvent } from 'gateway-contracts';
+import { GatewayRocket, GatewayShip, GatewayPayload, EnrichedGatewayLaunch, GatewayEvent } from 'gateway-contracts';
 import { REDIS_CHANNELS } from '../../../common/constants/redis.constants';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class RedisSubscriberService {
     constructor(private readonly redisSvc: RedisService,
         private readonly sseGwSvc: SseGatewayService,
         private readonly logger: PinoLogger) {
+
         this.logger.setContext(RedisSubscriberService.name);
     }
 
@@ -21,6 +22,7 @@ export class RedisSubscriberService {
         this.logger.info(`[Redis Subscriber] Listening on ${REDIS_CHANNELS.EVENTS} channel`);
 
         await client.subscribe(REDIS_CHANNELS.EVENTS, async (message: string) => {
+
             await this.handleMessage(message);
         });
     }
@@ -29,7 +31,6 @@ export class RedisSubscriberService {
 
         try {
 
-            // const parsed = JSON.parse(message) as GatewayEventBase & { source?: string; };
             const parsed = JSON.parse(message) as GatewayEvent & { source?: string; };
 
             // Skip self-published events
@@ -57,32 +58,39 @@ export class RedisSubscriberService {
             this.logger.info({ event: event.event, launchId }, '[Redis Subscriber] Processed event');
         }
         catch (error) {
+
             this.logger.error({ error }, '[Redis Subscriber] Failed to process message');
         }
     }
 
     // 
     private extractLaunchId(parsed: GatewayEvent & { source?: string }): string | null {
+
         return (parsed.payload as any)?.id || (parsed.payload as any)?.launch?.id || null;
     }
 
-    // private normalizeEvent(parsed: GatewayEventBase): GatewayEventBase {
     private normalizeEvent(parsed: GatewayEvent): GatewayEvent {
 
         switch (parsed.event) {
+
             case 'LOAD_ROCKETS':
-                return { event: 'LOAD_ROCKETS', payload: parsed.payload as Rocket[], timestamp: parsed.timestamp, source: parsed.source };
+
+                return { event: 'LOAD_ROCKETS', payload: parsed.payload as GatewayRocket[], timestamp: parsed.timestamp, source: parsed.source };
 
             case 'LOAD_SHIPS':
-                return { event: 'LOAD_SHIPS', payload: parsed.payload as Ship[], timestamp: parsed.timestamp, source: parsed.source };
+
+                return { event: 'LOAD_SHIPS', payload: parsed.payload as GatewayShip[], timestamp: parsed.timestamp, source: parsed.source };
 
             case 'LOAD_PAYLOADS':
-                return { event: 'LOAD_PAYLOADS', payload: parsed.payload as Payload[], timestamp: parsed.timestamp, source: parsed.source };
+
+                return { event: 'LOAD_PAYLOADS', payload: parsed.payload as GatewayPayload[], timestamp: parsed.timestamp, source: parsed.source };
 
             case 'ENRICH_LAUNCH':
-                return { event: 'ENRICH_LAUNCH', payload: parsed.payload as EnrichedLaunchPayload, timestamp: parsed.timestamp, source: parsed.source };
+
+                return { event: 'ENRICH_LAUNCH', payload: parsed.payload as EnrichedGatewayLaunch, timestamp: parsed.timestamp, source: parsed.source };
 
             default:
+
                 return { event: 'OTHER_EVENT', payload: parsed.payload, timestamp: parsed.timestamp, source: parsed.source };
         }
     }

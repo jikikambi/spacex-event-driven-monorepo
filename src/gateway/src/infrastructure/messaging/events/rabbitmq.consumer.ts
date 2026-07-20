@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PinoLogger } from "nestjs-pino";
 import { Channel } from "amqplib";
 import { EventHandlerService } from "./event-handler.service";
-import { GatewayEvent, GatewayEventBase } from "gateway-contracts";
+import { GatewayEvent } from "gateway-contracts";
 
 @Injectable()
 export class RabbitMQConsumer  {
@@ -24,19 +24,27 @@ export class RabbitMQConsumer  {
 
         await channel.consume(queue, async (msg) => {
 
+            this.logger.info(`[RabbitMQ] Received message: ${msg?.content.toString()}`);
+
             if (!msg) return;
 
             try {
 
-                // const event = JSON.parse(msg.content.toString()) as GatewayEventBase;
                 const event = JSON.parse(msg.content.toString()) as GatewayEvent;
+
+                this.logger.info(`[RabbitMQ] Received message: ${event.event} with ID: ${event.eventId}`);
+
                 await this.handler.handleEvent(event);
+
                 channel.ack(msg);
             }
             catch (err) {
+
                 this.logger.error("[RabbitMQ] Failed to process message:", err);
+
                 channel.nack(msg, false, false);
             }
+
         }, { noAck: false });
     }
 }

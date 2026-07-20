@@ -6,7 +6,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { TelemetryContextService } from '../../observability/logging/telemetry-context.service';
 import { ISpaceXProvider } from './spacex.provider';
 import { RequestMetadataService } from '../../common/middleware/request-metadata.service';
-import { Launchpad } from 'spacex-types';
+import { Launch, Launchpad } from 'spacex-types';
 
 @Injectable()
 export class SpaceXApiService implements ISpaceXProvider {
@@ -26,6 +26,10 @@ export class SpaceXApiService implements ISpaceXProvider {
         this.baseUrl = this.config.getOrThrow<string>('SPACEX_API');
 
         if (!this.baseUrl) throw new Error('SPACEX_API is not defined');
+    }
+    
+    async fetchLaunches(): Promise<Launch[]> {
+        throw new Error('Method not implemented.');
     }
 
     async fetchLaunch(id: string) {

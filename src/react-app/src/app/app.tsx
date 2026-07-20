@@ -1,10 +1,17 @@
-// Uncomment this line to use CSS modules
-// import styles from './app.module.css';
-
-import LaunchPage from "../presentation/pages/LaunchPage";
+import { AppLayout } from "../presentation/layouts/AppLayout";
+import { LaunchDashboardPage } from "../presentation/pages/LaunchDashboardPage";
 
 export function App() {
-  return <LaunchPage />;
+
+  return (
+
+    <AppLayout>
+
+      <LaunchDashboardPage />
+
+    </AppLayout>
+  );
+
 }
 
 export default App;

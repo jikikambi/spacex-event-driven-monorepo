@@ -1,10 +1,10 @@
-import { Rocket, Ship, Payload, EnrichedLaunchPayload } from "../gateway-payloads";
+import { GatewayRocket, GatewayShip, GatewayPayload, EnrichedGatewayLaunch } from "./gateway-payloads";
 
-// SpaceXEventMap
-export interface GatewayEventMap {
-  LOAD_ROCKETS: Rocket[];
-  LOAD_SHIPS: Ship[];
-  LOAD_PAYLOADS: Payload[];
-  ENRICH_LAUNCH: EnrichedLaunchPayload;
-  OTHER_EVENT: unknown;
-}
+// // SpaceXEventMap
+// export interface GatewayEventMap {
+//   LOAD_ROCKETS: Rocket[];
+//   LOAD_SHIPS: Ship[];
+//   LOAD_PAYLOADS: Payload[];
+//   ENRICH_LAUNCH: EnrichedLaunchPayload;
+//   OTHER_EVENT: unknown;
+// }

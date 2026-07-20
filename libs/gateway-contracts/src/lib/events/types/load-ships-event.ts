@@ -1,9 +1,7 @@
-import { GatewayMetadata } from "../../gateway-metadata";
-import { Ship } from "../../gateway-payloads";
-
-//export type LoadShipsEvent = Omit<GatewayEventBase<"LOAD_SHIPS">, "payload"> & { payload: Ship[]; };
+import { GatewayMetadata } from "../gateway-metadata";
+import { GatewayShip } from "../gateway-payloads";
 
 export interface LoadShipsEvent extends GatewayMetadata {
     event: "LOAD_SHIPS";
-    payload: Ship[];
+    payload: GatewayShip[];
 }

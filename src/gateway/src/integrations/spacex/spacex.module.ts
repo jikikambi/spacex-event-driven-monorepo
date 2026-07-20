@@ -13,13 +13,17 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { ObservabilityModule } from "../../observability/observability.module";
 
 export const AsyncLocalStorageProvider = {
+
   provide: AsyncLocalStorage,
   useValue: new AsyncLocalStorage<Map<string, string>>(),
 };
 
 @Module({
+
   imports: [HttpModule, ObservabilityModule, MetricsModule],
+
   controllers: [SpaceXController],
+
   providers: [TelemetryContextService, SpaceXApiService, SpaceXMockService,
     {
       provide: SPACEX_PROVIDER_TOKEN,
@@ -33,6 +37,7 @@ export const AsyncLocalStorageProvider = {
       }
     }
   ],
+  
   exports: [SPACEX_PROVIDER_TOKEN]
 })
 export class SpaceXModule { }

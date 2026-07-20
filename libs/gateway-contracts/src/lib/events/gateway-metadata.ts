@@ -1,5 +1,5 @@
 export interface GatewayMetadata {
     eventId?: string;
-    timestamp: number;
+    timestamp: string;
     source?: string;
 }

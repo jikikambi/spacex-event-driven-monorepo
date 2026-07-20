@@ -10,6 +10,7 @@ export class RequestMetadataService {
     run = (context: RequestContext, callback: () => void) => this.als.run(context, callback);
 
     get correlationId(): string | undefined {
+        
         return this.als.getStore()?.correlationId;
     }
 }

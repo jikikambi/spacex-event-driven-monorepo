@@ -7,16 +7,19 @@ import { Collection, Db, Document, MongoClient } from 'mongodb';
 export class MongoService implements OnModuleInit, OnModuleDestroy {
 
     private client: MongoClient | null = null;
+
     private db: Db | null = null;
 
     constructor(private readonly configService: ConfigService,
         private readonly logger: PinoLogger) { }
 
     async onModuleInit(): Promise<void> {
+
         await this.connect();
     }
 
     async onModuleDestroy(): Promise<void> {
+
         await this.disconnect();
     }
 
@@ -25,6 +28,7 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
         if (this.client) return;
 
         const mongoUrl = this.configService.getOrThrow<string>('MONGO_URL');
+
         const database = this.configService.getOrThrow<string>('MONGO_DB_NAME');
 
         try {
@@ -38,6 +42,7 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
             this.logger.info({ database, url: mongoUrl }, '[MongoDB] Connected.');
         }
         catch (error) {
+
             this.logger.error(error instanceof Error ? error.message ?? error : undefined, '[MongoDB] Connection failed.');
 
             throw error;
@@ -45,6 +50,7 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
     }
 
     isConnected(): boolean {
+
         return this.client !== null && this.db !== null;
     }
 
@@ -59,7 +65,9 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
             this.logger.info('[MongoDB] Connection closed.');
         }
         finally {
+
             this.client = null;
+
             this.db = null;
         }
     }
@@ -72,6 +80,7 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
     }
 
     getDatabase(): Db {
+        
         return this.db!;
     }
 }

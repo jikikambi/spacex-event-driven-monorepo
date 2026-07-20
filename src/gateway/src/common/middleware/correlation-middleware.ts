@@ -15,6 +15,7 @@ export function correlationMiddleware(requestMetadata: RequestMetadataService) {
         res.setHeader('x-correlation-id', correlationId);
 
         const span = trace.getActiveSpan();
+        
         span?.setAttribute('correlation.id', correlationId);
 
         requestMetadata.run({ correlationId }, next);

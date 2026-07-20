@@ -1,4 +1,3 @@
-import { GatewayEventBase } from "./gateway-event-base";
 import { EnrichLaunchEvent } from "./types/enrich-launch-event";
 import { LoadPayloadsEvent } from "./types/load-payloads-event";
 import { LoadRocketsEvent } from "./types/load-rockets-event";
@@ -16,9 +15,3 @@ export type GatewayEvent =
   | LoadPayloadsEvent
   | EnrichLaunchEvent
   | OtherEvent;
-
-// | GatewayEventBase<"LOAD_ROCKETS">
-// | GatewayEventBase<"LOAD_SHIPS">
-// | GatewayEventBase<"LOAD_PAYLOADS">
-// | EnrichLaunchEvent
-// | GatewayEventBase<"OTHER_EVENT">;

@@ -1,0 +1,119 @@
+import { EnrichLaunchEvent, EnrichedGatewayLaunch, GatewayEvent } from "gateway-contracts";
+import { EventClient, Listener } from "../../app/events/infrastructure";
+
+export class LaunchRepository {
+
+    private readonly launches = new Map<string, EnrichedGatewayLaunch>();
+
+    private readonly listeners = new Set<Listener>();
+
+    private unsubscribeEventClient?: () => void;
+
+    constructor(private readonly eventClient: EventClient) { }
+
+    /**
+     * Starts listening to gateway events.
+     * Safe to call multiple times.
+     */
+    public start(): void {
+
+        if (this.unsubscribeEventClient) return;
+
+        this.unsubscribeEventClient = this.eventClient.subscribe(event => this.handleEvent(event));
+
+    }
+
+    /**
+     * Stops listening to gateway events.
+     */
+    public stop(): void {
+
+        this.unsubscribeEventClient?.();
+
+        this.unsubscribeEventClient = undefined;
+
+    }
+
+    /**
+     * Subscribe to repository updates.
+     */
+    public onChange(listener: Listener): () => void {
+
+        this.listeners.add(listener);
+
+        return () => this.listeners.delete(listener);
+
+    }
+
+    /**
+     * Returns all launches.
+     */
+    public getAll(): readonly EnrichedGatewayLaunch[] {
+
+        return [...this.launches.values()];
+
+    }
+
+    /**
+     * Returns a launch by id.
+     */
+    public get(id: string): EnrichedGatewayLaunch | undefined {
+
+        return this.launches.get(id);
+
+    }
+
+    /**
+     * Checks whether a launch exists.
+     */
+    public has(id: string): boolean {
+
+        return this.launches.has(id);
+
+    }
+
+    /**
+     * Number of cached launches.
+     */
+    public get size(): number {
+
+        return this.launches.size;
+
+    }
+
+    /**
+     * Clears the repository.
+     */
+    public clear(): void {
+
+        this.launches.clear();
+
+        this.notify();
+
+    }
+
+    private handleEvent(event: GatewayEvent): void {
+
+        if (event.event !== "ENRICH_LAUNCH") return;
+
+        this.upsert(event);
+
+    }
+
+    private upsert(event: EnrichLaunchEvent): void {
+
+        const payload = event.payload;
+
+        this.launches.set(payload.launch.id, payload);
+
+        this.notify();
+
+    }
+
+    private notify(): void {
+
+        this.listeners.forEach(listener => listener());
+
+    }
+
+}

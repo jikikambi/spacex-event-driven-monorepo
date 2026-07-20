@@ -19,6 +19,11 @@ export class SpaceXMockService implements ISpaceXProvider {
         this.logger.setContext(SpaceXMockService.name);
     }
 
+    async fetchLaunches(): Promise<Launch[]> {
+
+        return launches.map(x => structuredClone(x));
+    }
+
     async fetchLaunch(id: string): Promise<Launch> {
 
         const context = this.logContext('fetchLaunch');

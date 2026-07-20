@@ -10,6 +10,8 @@ export class ConfigService {
 
             gateway: {
 
+                eventsUrl: import.meta.env.VITE_GATEWAY_EVENTS_URL,
+
                 baseUrl: import.meta.env.VITE_GATEWAY_BASE_URL,
 
                 sseEndpoint: "/events",
@@ -31,6 +33,7 @@ export class ConfigService {
             }
 
         };
+        
     }
 
     get settings(): Readonly<AppConfig> {
@@ -38,4 +41,5 @@ export class ConfigService {
         return this.config;
 
     }
+
 }

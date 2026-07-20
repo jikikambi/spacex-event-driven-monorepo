@@ -3,7 +3,7 @@ import { PinoLogger } from "nestjs-pino/PinoLogger";
 import { MongoService } from "../../database/mongo/mongo.service";
 import { RedisService } from "../../database/redis/redis.service";
 import { LaunchIdentityService } from "./launch-identity.service";
-import { GatewayEventBase, EnrichLaunchEvent, GatewayEvent, GatewayEventType } from "gateway-contracts";
+import { GatewayEvent } from "gateway-contracts";
 
 @Injectable()
 export class EventDeduplicationService {
@@ -12,10 +12,10 @@ export class EventDeduplicationService {
         private readonly redisSvc: RedisService,
         private readonly mongoSvc: MongoService,
         private readonly identitySvc: LaunchIdentityService) {
+            
         this.logger.setContext(EventDeduplicationService.name);
     }
 
-    // async shouldProcess<T extends GatewayEventType>(event: GatewayEventBase<T> | EnrichLaunchEvent) {
     async shouldProcess(event: GatewayEvent): Promise<boolean> {
 
         if (event.event !== "ENRICH_LAUNCH") {

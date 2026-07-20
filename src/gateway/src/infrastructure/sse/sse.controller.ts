@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { PinoLogger } from 'nestjs-pino';
 import { MongoService } from '../database/mongo/mongo.service';
 import { SseGatewayService } from './sse-gateway.service';
-import { GatewayEvent, GatewayEventBase } from 'gateway-contracts';
+import { GatewayEvent } from 'gateway-contracts';
 
 @Controller('events')
 export class SseController {
@@ -11,6 +11,7 @@ export class SseController {
     constructor(private readonly gateway: SseGatewayService,
         private readonly mongoSvc: MongoService,
         private readonly logger: PinoLogger) {
+
         this.logger.setContext(SseController.name);
     }
 
@@ -25,8 +26,10 @@ export class SseController {
 
         // 2. Replay historical events (Redis/Mongo)
         if (since) {
+
             // Reconnecting client: replay persistent history
             await this.replayEvents(res, since);
+
         }
         else {
             // New client: replay recent Redis cache
@@ -34,29 +37,42 @@ export class SseController {
         }
 
         req.on('close', () => {
+
             this.gateway.unregisterClient(clientId);
+
             res.end();
+
         });
+
     }
 
     private async replayEvents(res: Response, since: Date): Promise<void> {
 
+        console.log(since);
+
         try {
 
-            // const collection = this.mongoSvc.getCollection<GatewayEventBase>('events');
             const collection = this.mongoSvc.getCollection<GatewayEvent>('events');
 
             const events = await collection
-                .find({ receivedAt: { $gt: since } })
+                .find({ createdAt: { $gt: since } })
                 .toArray();
 
             for (const event of events) {
-                res.write(`data: ${JSON.stringify(event)}\n\n`);
+
+                const eventData = JSON.stringify(event);
+
+                res.write(`data: ${eventData}\n\n`);
+
             }
+            
         }
         catch (error) {
 
             this.logger.error({ error }, '[SSE] Failed to replay missed events');
+
         }
+
     }
+
 }

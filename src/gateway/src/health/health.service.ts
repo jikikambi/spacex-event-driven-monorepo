@@ -16,6 +16,7 @@ export class HealthService {
         private readonly redis: RedisService,
         private readonly rabbit: RabbitMQService,
         private readonly logger: PinoLogger) {
+
         this.logger.setContext(HealthService.name);
     }
 
@@ -45,7 +46,7 @@ export class HealthService {
                         status: Object.values(checks).every(Boolean) ? 'healthy' : 'degraded',
                         timestamp: new Date().toISOString(),
                         uptime: process.uptime(),
-                        checks,
+                        checks
                     };
 
                 }
@@ -59,12 +60,14 @@ export class HealthService {
 
                 }
                 finally {
+
                     span.end();
                 }
             });
     }
 
     private logContext(operation: string) {
+        
         return {
             ...this.telCtxSvc.logContext,
             component: 'HealthService',

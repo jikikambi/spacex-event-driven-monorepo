@@ -1,18 +1,35 @@
 import { Injectable } from "@nestjs/common";
 import { EnrichmentService } from "../../../enrichment/enrichment.service";
-import { GatewayEvent, EnrichLaunchEvent } from "gateway-contracts";
+import { GatewayEvent, EnrichLaunchEvent, LaunchEvent } from "gateway-contracts";
 
 @Injectable()
 export class EventEnrichmentService {
 
     constructor(private readonly enrichSvc: EnrichmentService) { }
 
-    async enrich(event: GatewayEvent): Promise<GatewayEvent | EnrichLaunchEvent> {
+    async enrich(event: GatewayEvent): Promise<GatewayEvent> {
 
-        if (event.event !== 'ENRICH_LAUNCH') return event;
+        switch (event.event) {
 
-        const payload = await this.enrichSvc.enrichLaunchWithCache(event.payload);
+            case "LAUNCH_RECEIVED":
+                return this.enrichLaunch(event);
 
-        return { ...event, payload };
+            default:
+                return event;
+        }
+    }
+
+    private async enrichLaunch(event: LaunchEvent): Promise<EnrichLaunchEvent> {
+
+        const payload = await this.enrichSvc.buildEnrichedLaunch(event.payload.id);
+
+        return {
+
+            ...event,
+
+            event: "ENRICH_LAUNCH",
+
+            payload,
+        };
     }
 }

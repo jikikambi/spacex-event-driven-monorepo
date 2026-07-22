@@ -65,18 +65,18 @@ export class SseGatewayService {
 
             const keys = await this.redisSvc.keys(REDIS_KEYS.EVENTS);
 
-            console.log(keys);
+            //console.log(keys);
 
             if (keys.length > 0) {
 
                 const cachedEvents = await this.redisSvc.mGet(keys);
 
-                console.log(cachedEvents);
+                //console.log(cachedEvents);
 
                 cachedEvents
                     .filter((evt): evt is string => evt !== null)
                     .forEach((evt) => {
-                        console.log("Sending SSE", evt);
+                        //console.log("Sending SSE", evt);
                         res.write(`data: ${evt}\n\n`);
                     });
 

@@ -5,13 +5,16 @@ import { PayloadViewModelMapper } from "../application/launches/view-models/mapp
 import { RocketViewModelMapper } from "../application/launches/view-models/mappers/RocketViewModelMapper";
 import { ShipViewModelMapper } from "../application/launches/view-models/mappers/ShipViewModelMapper";
 import { ConfigService } from "../config";
-import { EventModule } from "./events/EventModule";
+import { EventModule } from "../infrastructure/events/EventModule";
+import { ConnectionStatusService } from "../infrastructure/events/connection/ConnectionStatusService";
 
 export class ApplicationContainer {
 
      public readonly config = new ConfigService();
 
-     public readonly eventModule = new EventModule(this.config);
+     public readonly health = new ConnectionStatusService();     
+
+     public readonly eventModule = new EventModule(this.config, this.health);
 
      public readonly launchRepo = new LaunchRepository(this.eventModule.client);
 
@@ -35,5 +38,4 @@ export class ApplicationContainer {
           this.eventModule.client.stop();
 
      }
-
 }

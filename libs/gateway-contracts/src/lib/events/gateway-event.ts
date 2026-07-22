@@ -1,4 +1,5 @@
 import { EnrichLaunchEvent } from "./types/enrich-launch-event";
+import { LaunchEvent } from "./types/launch-event";
 import { LoadPayloadsEvent } from "./types/load-payloads-event";
 import { LoadRocketsEvent } from "./types/load-rockets-event";
 import { LoadShipsEvent } from "./types/load-ships-event";
@@ -13,5 +14,6 @@ export type GatewayEvent =
   | LoadRocketsEvent
   | LoadShipsEvent
   | LoadPayloadsEvent
+  | LaunchEvent
   | EnrichLaunchEvent
   | OtherEvent;

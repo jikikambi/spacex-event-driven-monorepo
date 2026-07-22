@@ -1,11 +1,12 @@
 import { EnrichLaunchEvent, EnrichedGatewayLaunch, GatewayEvent } from "gateway-contracts";
-import { EventClient, Listener } from "../../app/events/infrastructure";
+import { EventListener } from "../../infrastructure/events/types/EventListener";
+import { EventClient } from "../../infrastructure/events/client";
 
 export class LaunchRepository {
 
     private readonly launches = new Map<string, EnrichedGatewayLaunch>();
 
-    private readonly listeners = new Set<Listener>();
+    private readonly listeners = new Set<EventListener>();
 
     private unsubscribeEventClient?: () => void;
 
@@ -20,7 +21,6 @@ export class LaunchRepository {
         if (this.unsubscribeEventClient) return;
 
         this.unsubscribeEventClient = this.eventClient.subscribe(event => this.handleEvent(event));
-
     }
 
     /**
@@ -37,7 +37,7 @@ export class LaunchRepository {
     /**
      * Subscribe to repository updates.
      */
-    public onChange(listener: Listener): () => void {
+    public onChange(listener: EventListener): () => void {
 
         this.listeners.add(listener);
 

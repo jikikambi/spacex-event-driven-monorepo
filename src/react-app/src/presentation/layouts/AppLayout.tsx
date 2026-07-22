@@ -1,4 +1,5 @@
 import { PropsWithChildren } from "react";
+import { ConnectionStatus } from "../components/ConnectionStatus";
 
 export function AppLayout({ children }: PropsWithChildren) {
 
@@ -6,21 +7,27 @@ export function AppLayout({ children }: PropsWithChildren) {
 
         <div className="min-h-screen flex flex-col bg-gray-100 text-gray-900">
 
-            <header className="bg-gray-900 text-white shadow-md ">
+            <header className="border-b bg-slate-900 text-white shadow">
 
-                <div className="mx-auto max-w-7xl px-6 py-6">
+                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
 
-                    <h1 className="text-4xl font-bold">
+                    <div>
 
-                        SpaceX Event Dashboard
+                        <h1 className="text-3xl font-bold">
 
-                    </h1>
+                            SpaceX Event Dashboard
 
-                    <p className="mt-2 text-gray-300">
+                        </h1>
 
-                        Live launch telemetry powered by Server-Sent Events
+                        <p className="mt-1 text-sm text-slate-300">
 
-                    </p>
+                            Live launch telemetry powered by Server-Sent Events
+
+                        </p>
+
+                    </div>
+
+                    <ConnectionStatus />
 
                 </div>
 

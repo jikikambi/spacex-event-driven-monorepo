@@ -20,6 +20,12 @@ export interface Core {
   landpad: string | null;
 }
 
+export interface Failure {
+  time: number
+  altitude: any
+  reason: string
+}
+
 export interface Launch {
   id: string;
   name: string;
@@ -31,6 +37,12 @@ export interface Launch {
   details: string | null;
   rocket: string;
   launchpad: string;
+  fairings: {
+    reused: boolean;
+    recovery_attempt: boolean
+    recovered: boolean
+    ships: string[]
+  }
   links: {
     patch: { small: string | null; large: string | null };
     reddit: {
@@ -61,10 +73,10 @@ export interface Launch {
   payloads: string[];
   crew: string[];
   capsules: string[];
-  failures: string[];
+  failures: Failure[];
   window: number;
   net: boolean;
-  tdb: boolean;
+  tbd: boolean;
   auto_update: boolean;
   flight_number: number;
 }

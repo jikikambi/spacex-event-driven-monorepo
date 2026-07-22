@@ -15,7 +15,6 @@ export class EventDistributionService {
 
     async distribute(launchId: string, dedupKey: string, event: EnrichLaunchEvent) {
 
-
         await this.safeExecute("RabbitMQ", event, async () => {
 
             this.rabbitMqSvc.publish(event);
@@ -39,7 +38,6 @@ export class EventDistributionService {
     }
 
     private async safeExecute(operation: string, event: EnrichLaunchEvent, action: () => Promise<void>) {
-
 
         try {
             

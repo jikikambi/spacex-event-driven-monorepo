@@ -15,11 +15,9 @@ export class EnrichmentService {
         this.logger.setContext(EnrichmentService.name)
     }
 
-    async enrichLaunchWithCache(payload: { id: string } | EnrichedGatewayLaunch): Promise<EnrichedGatewayLaunch> {
+    async buildEnrichedLaunch(id: string): Promise<EnrichedGatewayLaunch> {
 
-        if ('launch' in payload) return payload;
-
-        const cacheKey = `enrichedLaunch:${payload.id}`;
+        const cacheKey = `enrichedLaunch:${id}`;
 
         const cached = await this.redisSvc.get(cacheKey);
 
@@ -30,7 +28,7 @@ export class EnrichmentService {
             return JSON.parse(cached) as EnrichedGatewayLaunch;
         }
 
-        const launch = await this.provider.fetchLaunch(payload.id);
+        const launch = await this.provider.fetchLaunch(id);
 
         const [rocket, payloads, ships] = await Promise.all([
 
@@ -48,6 +46,8 @@ export class EnrichmentService {
             payloads: payloads.map(mapPayload),
             ships: ships.map(mapShip)
         };
+
+        console.log("--- EnrichmentService ---", enriched)
 
         await this.redisSvc.set(cacheKey, JSON.stringify(enriched), 300);
 

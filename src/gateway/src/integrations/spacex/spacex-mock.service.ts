@@ -16,28 +16,30 @@ export class SpaceXMockService implements ISpaceXProvider {
     constructor(private readonly logger: PinoLogger,
         private readonly telctxSvc: TelemetryContextService,
         private readonly metadataSvc: RequestMetadataService) {
+
         this.logger.setContext(SpaceXMockService.name);
     }
 
     async fetchLaunches(): Promise<Launch[]> {
 
-        return launches.map(x => structuredClone(x));
+        this.logger.debug({ count: this.launchMap.size }, "Loading mock launches");
+
+        return [...this.launchMap.values()].map(x => structuredClone(x));
+
     }
 
     async fetchLaunch(id: string): Promise<Launch> {
 
         const context = this.logContext('fetchLaunch');
 
-        this.logger.info(
-            {
-                ...context
-            }, 'Fetching launch from SpaceX');
+        this.logger.info({ ...context }, 'Fetching launch from SpaceX');
 
         try {
 
             const launch = this.launchMap.get(id);
 
             if (!launch) {
+
                 throw new NotFoundException(`Mock launch '${id}' not found`);
             }
 
@@ -46,6 +48,7 @@ export class SpaceXMockService implements ISpaceXProvider {
             return cloned;
         }
         catch (error) {
+
             this.logger.error(
                 {
                     ...context,
@@ -68,14 +71,22 @@ export class SpaceXMockService implements ISpaceXProvider {
 
         this.logger.debug({ id }, 'Loading mock rocket');
 
-        return (this.rocketMap.get(id) ?? null);
+        const rocket = this.rocketMap.get(id);
+
+        if (!rocket) {
+
+            this.logger.warn({ rocketId: id }, "Rocket not found in mock dataset");
+
+            return null;
+
+        }
+
+        return structuredClone(rocket);
     }
 
     async fetchPayloads(ids: string[]): Promise<Payload[]> {
 
-        if (!ids.length) {
-            return [];
-        }
+        if (!ids.length) return [];
 
         this.logger.debug({ count: ids.length }, 'Loading mock payloads');
 
@@ -86,9 +97,7 @@ export class SpaceXMockService implements ISpaceXProvider {
 
     async fetchShips(ids: string[]): Promise<Ship[]> {
 
-        if (!ids.length) {
-            return [];
-        }
+        if (!ids.length) return [];
 
         this.logger.debug({ count: ids.length }, 'Loading mock ships');
 

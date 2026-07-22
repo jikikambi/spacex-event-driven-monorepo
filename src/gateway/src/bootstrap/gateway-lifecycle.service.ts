@@ -3,13 +3,13 @@ import { PinoLogger } from "nestjs-pino";
 import { RabbitMQConsumer } from "../infrastructure/messaging/events/rabbitmq.consumer";
 import { RedisSubscriberService } from "../infrastructure/messaging/events/redis-subscriber.service";
 import { RabbitMQService } from "../infrastructure/messaging/rabbitmq/rabbitmq.service";
-import { LaunchProducerService } from "./launch-producer.service";
+import { LaunchBootstrapService } from "./launch-bootstrap.service";
 
 @Injectable()
 export class GatewayLifecycleService implements OnApplicationBootstrap {
 
     constructor(private readonly rabbit: RabbitMQService,
-        private readonly lpSvc: LaunchProducerService,
+        private readonly lpSvc: LaunchBootstrapService,
         private readonly consumer: RabbitMQConsumer,
         private readonly subscriber: RedisSubscriberService,
         private readonly logger: PinoLogger,

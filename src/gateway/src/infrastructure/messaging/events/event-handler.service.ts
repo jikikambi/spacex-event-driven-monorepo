@@ -18,7 +18,7 @@ export class EventHandlerService {
 
     async handleEvent(event: GatewayEvent): Promise<void> {
 
-        console.log("HANDLE EVENT", event.event);
+        //console.log("HANDLE EVENT", event.event);
 
         if (!event.event || !event.payload) {
 

@@ -18,7 +18,7 @@ export class EventDispatcherService {
 
     async dispatch(event: GatewayEvent): Promise<void> {
 
-         console.log("DISPATCH", event.event);
+        // console.log("DISPATCH", event.event);
 
 
         if (event.event !== "ENRICH_LAUNCH") return;

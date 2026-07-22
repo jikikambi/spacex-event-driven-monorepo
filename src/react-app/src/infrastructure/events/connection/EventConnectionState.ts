@@ -1,6 +1,10 @@
 export enum EventConnectionState {
-    DISCONNECTED = "DISCONNECTED",
+
+    OFFLINE = "OFFLINE",
+
     CONNECTING = "CONNECTING",
+
     CONNECTED = "CONNECTED",
+
     RECONNECTING = "RECONNECTING",
 }

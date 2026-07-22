@@ -1,3 +1,4 @@
+import { ConnectionStatus } from "../components/ConnectionStatus";
 import { LaunchCard } from "../components/LaunchCard";
 import { useLaunches } from "../hooks/useLaunches";
 
@@ -16,29 +17,45 @@ export function LaunchDashboardPage() {
       </h2>
 
       {
-        !launches.length && (
+        launches.length === 0 && (
 
-          <p className="text-gray-500">
+          <div className="rounded-lg border border-dashed border-gray-300 bg-white p-12 text-center">
 
-            Waiting for launch events...
+            <h3 className="text-lg font-semibold">
 
-          </p>
+              No launches available
 
-        )}
+            </h3>
+
+            <p className="mt-2 text-gray-500">
+
+              Waiting for launch events from the gateway...
+
+            </p>
+
+          </div>
+
+        )
+
+      }
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
 
-        {launches.map(launch => (
+        {
 
-          <LaunchCard
+          launches.map(launch => (
 
-            key={launch.id}
+            <LaunchCard
 
-            launch={launch}
+              key={launch.id}
 
-          />
+              launch={launch}
 
-        ))}
+            />
+
+          ))
+
+        }
 
       </div>
 

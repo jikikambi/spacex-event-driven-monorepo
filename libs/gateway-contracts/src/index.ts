@@ -4,6 +4,7 @@ export * from './lib/mappers/mapper-types';
 export * from './lib/events/gateway-event-type';
 export * from './lib/events/gateway-event';
 export * from './lib/events/gateway-payloads';
+export * from './lib/events/types/launch-event';
 export * from './lib/events/types/enrich-launch-event';
 export * from './lib/events/types/load-payloads-event';
 export * from './lib/events/types/load-rockets-event';

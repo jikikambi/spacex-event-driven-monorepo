@@ -48,7 +48,7 @@ export class SseController {
 
     private async replayEvents(res: Response, since: Date): Promise<void> {
 
-        console.log(since);
+        //console.log(since);
 
         try {
 

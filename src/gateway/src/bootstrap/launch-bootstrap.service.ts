@@ -3,17 +3,17 @@ import { PinoLogger } from "nestjs-pino";
 import { SPACEX_PROVIDER_TOKEN } from "../common/constants/spacex.constants";
 import { ISpaceXProvider } from "../integrations/spacex/spacex.provider";
 import { RabbitMQService } from "../infrastructure/messaging/rabbitmq/rabbitmq.service";
-import { EnrichedGatewayLaunch, GatewayEvent, GatewayLaunch, mapPayload, mapRocket, mapShip } from "gateway-contracts";
+import { GatewayEvent, GatewayLaunch } from "gateway-contracts";
 
 @Injectable()
-export class LaunchProducerService implements OnApplicationBootstrap {
+export class LaunchBootstrapService implements OnApplicationBootstrap {
 
     constructor(@Inject(SPACEX_PROVIDER_TOKEN) private readonly provider: ISpaceXProvider,
         private readonly rabbitSvc: RabbitMQService,
         private readonly logger: PinoLogger,
     ) {
 
-        this.logger.setContext(LaunchProducerService.name);
+        this.logger.setContext(LaunchBootstrapService.name);
     }
 
     async onApplicationBootstrap(): Promise<void> {
@@ -41,26 +41,9 @@ export class LaunchProducerService implements OnApplicationBootstrap {
 
     private async publishLaunch(launch: GatewayLaunch): Promise<void> {
 
-        const [rocket, payloads, ships] = await Promise.all([
-
-            this.provider.fetchRocket(launch.rocket),
-
-            this.provider.fetchPayloads(launch.payloads ?? []),
-            
-            this.provider.fetchShips(launch.ships ?? []),
-        ]);
-
-        const enriched: EnrichedGatewayLaunch =
-        {
-            launch: launch,
-            rocket: mapRocket(rocket),
-            payloads: payloads.map(mapPayload),
-            ships: ships.map(mapShip)
-        };
-
         const event: GatewayEvent = {
 
-            event: "ENRICH_LAUNCH",
+            event: "LAUNCH_RECEIVED",
 
             eventId: crypto.randomUUID(),
 
@@ -68,7 +51,10 @@ export class LaunchProducerService implements OnApplicationBootstrap {
 
             source: "gateway",
 
-            payload: enriched
+            payload: {
+
+                id: launch.id
+            }
         };
 
         await this.rabbitSvc.publish(event);

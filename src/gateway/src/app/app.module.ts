@@ -17,7 +17,7 @@ import { RedisModule } from '../infrastructure/database/redis/redis.module';
 import { RabbitMQModule } from '../infrastructure/messaging/rabbitmq/rabbitmq.module';
 import { EventsModule } from '../infrastructure/messaging/events/events.module';
 import { ObservabilityModule } from '../observability/observability.module';
-import { LaunchProducerService } from '../bootstrap/launch-producer.service';
+import { LaunchBootstrapService } from '../bootstrap/launch-bootstrap.service';
 
 @Module({
   imports: [
@@ -50,7 +50,7 @@ import { LaunchProducerService } from '../bootstrap/launch-producer.service';
 
   controllers: [AppController],
 
-  providers: [AppService, LaunchProducerService, GatewayLifecycleService, HttpExceptionFilter, OpenTelemetryService,
+  providers: [AppService, LaunchBootstrapService, GatewayLifecycleService, HttpExceptionFilter, OpenTelemetryService,
     {
       provide: APP_INTERCEPTOR,
       useClass: MetricsInterceptor,

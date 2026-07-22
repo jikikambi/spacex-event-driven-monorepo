@@ -1,1 +1,0 @@
-export type Listener<T = void> = (event: T) => void;

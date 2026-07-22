@@ -1,11 +1,12 @@
-import { Listener } from "../../app/events/infrastructure";
+
 import { LaunchRepository } from "./LaunchRepository";
 import { LaunchViewModelMapper } from "./view-models/mappers/LaunchViewModelMapper";
 import { LaunchViewModel } from "./view-models/LaunchViewModel";
+import { EventListener } from "../../infrastructure/events/types/EventListener";
 
 export class LaunchStore {
 
-    private readonly listeners = new Set<Listener>();
+    private readonly listeners = new Set<EventListener>();
 
     private unsubscribeRepository?: () => void;
 
@@ -30,7 +31,7 @@ export class LaunchStore {
 
     }
 
-    public subscribe(listener: Listener): () => void {
+    public subscribe(listener: EventListener): () => void {
 
         this.listeners.add(listener);
 

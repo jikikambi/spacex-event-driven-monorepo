@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { Response } from 'express';
-import { RedisService } from '../database/redis/redis.service';
 import { randomUUID } from 'crypto';
 import { REDIS_KEYS } from '../../common/constants/redis.constants';
 import { GatewayEvent } from 'gateway-contracts';
+import { RedisService } from '../../infrastructure/cache/redis/redis.service';
 
 @Injectable()
 export class SseGatewayService {

@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { RedisService } from '../infrastructure/database/redis/redis.service';
+import { RedisService } from '../infrastructure/cache/redis/redis.service';
 import { EnrichedGatewayLaunch, mapRocket, mapPayload, mapShip } from 'gateway-contracts';
 import { SPACEX_PROVIDER_TOKEN } from '../common/constants/spacex.constants';
-import { ISpaceXProvider } from '../integrations/spacex/spacex.provider';
+import { ISpaceXProvider } from '../infrastructure/external/spacex/spacex.provider';
 
 @Injectable()
 export class EnrichmentService {
@@ -46,9 +46,7 @@ export class EnrichmentService {
             payloads: payloads.map(mapPayload),
             ships: ships.map(mapShip)
         };
-
-        console.log("--- EnrichmentService ---", enriched)
-
+        
         await this.redisSvc.set(cacheKey, JSON.stringify(enriched), 300);
 
         this.logger.debug({ cacheKey }, 'Cached enriched launch.');

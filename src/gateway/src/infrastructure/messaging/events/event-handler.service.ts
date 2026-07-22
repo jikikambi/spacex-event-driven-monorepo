@@ -18,8 +18,6 @@ export class EventHandlerService {
 
     async handleEvent(event: GatewayEvent): Promise<void> {
 
-        //console.log("HANDLE EVENT", event.event);
-
         if (!event.event || !event.payload) {
 
             this.logger.warn('Skipped invalid event payload', event);

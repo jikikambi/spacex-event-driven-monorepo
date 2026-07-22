@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
-import { SpaceXModule } from "../integrations/spacex/spacex.module";
 import { EnrichmentService } from "./enrichment.service";
-import { RedisModule } from "../infrastructure/database/redis/redis.module";
+import { RedisModule } from "../infrastructure/cache/redis/redis.module";
+import { SpaceXModule } from "../infrastructure/external/spacex/spacex.module";
 
 @Module({
     imports:[SpaceXModule, RedisModule],

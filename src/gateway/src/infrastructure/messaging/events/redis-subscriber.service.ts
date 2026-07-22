@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { RedisService } from '../../database/redis/redis.service';
-import { SseGatewayService } from '../../sse/sse-gateway.service';
+import { RedisService } from '../../cache/redis/redis.service';
 import { GatewayRocket, GatewayShip, GatewayPayload, EnrichedGatewayLaunch, GatewayEvent } from 'gateway-contracts';
 import { REDIS_CHANNELS } from '../../../common/constants/redis.constants';
+import { SseGatewayService } from '../../../interfaces/sse/sse-gateway.service';
 
 @Injectable()
 export class RedisSubscriberService {

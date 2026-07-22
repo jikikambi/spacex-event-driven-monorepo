@@ -1,26 +1,26 @@
 import { Injectable } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino/PinoLogger";
 import { EnrichLaunchEvent } from "gateway-contracts";
-import { RedisService } from "../../database/redis/redis.service";
-import { SseGatewayService } from "../../sse/sse-gateway.service";
+import { RedisService } from "../../cache/redis/redis.service";
 import { RabbitMQService } from "../rabbitmq/rabbitmq.service";
+import { SseGatewayService } from "../../../interfaces/sse/sse-gateway.service";
 
 @Injectable()
 export class EventDistributionService {
 
-    constructor(private readonly rabbitMqSvc: RabbitMQService,
+    constructor(//private readonly rabbitMqSvc: RabbitMQService,
         private readonly redisSvc: RedisService,
         private readonly ssegwSvc: SseGatewayService,
         private readonly logger: PinoLogger) { }
 
     async distribute(launchId: string, dedupKey: string, event: EnrichLaunchEvent) {
 
-        await this.safeExecute("RabbitMQ", event, async () => {
+        // await this.safeExecute("RabbitMQ", event, async () => {
 
-            this.rabbitMqSvc.publish(event);
+        //     this.rabbitMqSvc.publish(event);
 
-            this.logger.info({ launchId }, `[RabbitMQ] Published event: ${event.event}`);
-        });
+        //     this.logger.info({ launchId }, `[RabbitMQ] Published event: ${event.event}`);
+        // });
 
         await this.safeExecute("Redis", event, async () => {
 

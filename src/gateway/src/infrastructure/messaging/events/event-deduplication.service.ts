@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino/PinoLogger";
 import { MongoService } from "../../database/mongo/mongo.service";
-import { RedisService } from "../../database/redis/redis.service";
+import { RedisService } from "../../cache/redis/redis.service";
 import { LaunchIdentityService } from "./launch-identity.service";
 import { GatewayEvent } from "gateway-contracts";
 

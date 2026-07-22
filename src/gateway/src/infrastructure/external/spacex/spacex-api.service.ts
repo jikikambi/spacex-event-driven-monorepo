@@ -3,10 +3,10 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { PinoLogger } from 'nestjs-pino';
-import { TelemetryContextService } from '../../observability/logging/telemetry-context.service';
 import { ISpaceXProvider } from './spacex.provider';
-import { RequestMetadataService } from '../../common/middleware/request-metadata.service';
 import { Launch, Launchpad } from 'spacex-types';
+import { RequestMetadataService } from '../../../common/middleware/request-metadata.service';
+import { TelemetryContextService } from '../../../observability/logging/telemetry-context.service';
 
 @Injectable()
 export class SpaceXApiService implements ISpaceXProvider {

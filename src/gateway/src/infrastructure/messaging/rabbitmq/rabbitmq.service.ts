@@ -8,7 +8,6 @@ import { QUEUE_NAMES } from '../../../common/constants/queue.constants';
 import { DEFAULT_URL } from '../../../common/constants/rabbitmq.constants';
 import { GatewayEvent } from 'gateway-contracts';
 
-// export interface BufferedEvent<T extends GatewayEventBase> {
 export interface BufferedEvent<T extends GatewayEvent> {
     timestamp: number;
     payload: T;

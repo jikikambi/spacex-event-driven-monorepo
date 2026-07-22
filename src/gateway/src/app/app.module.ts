@@ -6,18 +6,18 @@ import pino from 'pino';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { HealthModule } from '../health/health.module';
-import { SpaceXModule } from '../integrations/spacex/spacex.module';
 import { HttpExceptionFilter } from '../common/exceptions/http-exception.filter';
 import { MetricsModule } from '../observability/metrics/metrics.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MetricsInterceptor } from '../observability/metrics/metrics.Interceptor';
 import { OpenTelemetryService } from '../observability/telemetry/opentelemetry.service';
 import { GatewayLifecycleService } from '../bootstrap/gateway-lifecycle.service';
-import { RedisModule } from '../infrastructure/database/redis/redis.module';
+import { RedisModule } from '../infrastructure/cache/redis/redis.module';
 import { RabbitMQModule } from '../infrastructure/messaging/rabbitmq/rabbitmq.module';
 import { EventsModule } from '../infrastructure/messaging/events/events.module';
 import { ObservabilityModule } from '../observability/observability.module';
 import { LaunchBootstrapService } from '../bootstrap/launch-bootstrap.service';
+import { SpaceXModule } from '../infrastructure/external/spacex/spacex.module';
 
 @Module({
   imports: [

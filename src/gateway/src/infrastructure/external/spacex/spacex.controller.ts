@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, NotFoundException, Param } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino";
-import { SPACEX_PROVIDER_TOKEN } from "../../common/constants/spacex.constants";
 import { ISpaceXProvider } from "./spacex.provider";
+import { SPACEX_PROVIDER_TOKEN } from "../../../common/constants/spacex.constants";
 
 @Controller('launch')
 export class SpaceXController {

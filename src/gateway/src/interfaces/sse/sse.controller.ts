@@ -1,9 +1,9 @@
 import { Controller, Get, MessageEvent, Query, Req, Res, Sse } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { PinoLogger } from 'nestjs-pino';
-import { MongoService } from '../database/mongo/mongo.service';
 import { SseGatewayService } from './sse-gateway.service';
 import { GatewayEvent } from 'gateway-contracts';
+import { MongoService } from '../../infrastructure/database/mongo/mongo.service';
 
 @Controller('events')
 export class SseController {

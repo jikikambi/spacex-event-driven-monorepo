@@ -1,9 +1,9 @@
 import { Injectable, Inject, OnApplicationBootstrap } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino";
 import { SPACEX_PROVIDER_TOKEN } from "../common/constants/spacex.constants";
-import { ISpaceXProvider } from "../integrations/spacex/spacex.provider";
 import { RabbitMQService } from "../infrastructure/messaging/rabbitmq/rabbitmq.service";
 import { GatewayEvent, GatewayLaunch } from "gateway-contracts";
+import { ISpaceXProvider } from "../infrastructure/external/spacex/spacex.provider";
 
 @Injectable()
 export class LaunchBootstrapService implements OnApplicationBootstrap {

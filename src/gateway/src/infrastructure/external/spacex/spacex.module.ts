@@ -2,15 +2,15 @@ import { Module } from "@nestjs/common";
 import { SpaceXApiService } from "./spacex-api.service";
 import { HttpModule } from "@nestjs/axios";
 import { SpaceXController } from "./spacex.controller";
-import { MetricsModule } from "../../observability/metrics/metrics.module";
-import { TelemetryContextService } from "../../observability/logging/telemetry-context.service";
 import { SpaceXMockService } from "./spacex-mock.service";
 import { ConfigService } from "@nestjs/config";
 import { ModuleRef } from "@nestjs/core";
-import { SPACEX_PROVIDER_TOKEN } from "../../common/constants/spacex.constants";
 import { ISpaceXProvider } from "./spacex.provider";
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { ObservabilityModule } from "../../observability/observability.module";
+import { SPACEX_PROVIDER_TOKEN } from "../../../common/constants/spacex.constants";
+import { TelemetryContextService } from "../../../observability/logging/telemetry-context.service";
+import { MetricsModule } from "../../../observability/metrics/metrics.module";
+import { ObservabilityModule } from "../../../observability/observability.module";
 
 export const AsyncLocalStorageProvider = {
 

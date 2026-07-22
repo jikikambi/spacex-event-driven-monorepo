@@ -17,10 +17,7 @@ export class EventDispatcherService {
     }
 
     async dispatch(event: GatewayEvent): Promise<void> {
-
-        // console.log("DISPATCH", event.event);
-
-
+        
         if (event.event !== "ENRICH_LAUNCH") return;
 
         const { launchId, dedupKey } = this.identitySvc.getIdentity(event.payload);
@@ -36,4 +33,5 @@ export class EventDispatcherService {
 
         await this.eventSvc.distribute(launchId, dedupKey, event);
     }
+    
 }

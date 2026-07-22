@@ -1,6 +1,6 @@
 import { Injectable, Scope } from "@nestjs/common";
 import { MongoService } from "../infrastructure/database/mongo/mongo.service";
-import { RedisService } from "../infrastructure/database/redis/redis.service";
+import { RedisService } from "../infrastructure/cache/redis/redis.service";
 import { RabbitMQService } from "../infrastructure/messaging/rabbitmq/rabbitmq.service";
 import { PinoLogger } from "nestjs-pino";
 import { TelemetryContextService } from "../observability/logging/telemetry-context.service";

@@ -2,7 +2,7 @@ import { Controller, Get, MessageEvent, Query, Req, Res, Sse } from '@nestjs/com
 import type { Request, Response } from 'express';
 import { PinoLogger } from 'nestjs-pino';
 import { SseGatewayService } from './sse-gateway.service';
-import { GatewayEvent } from 'gateway-contracts';
+import { IncomingGatewayEvent } from 'gateway-contracts';
 import { MongoService } from '../../infrastructure/database/mongo/mongo.service';
 
 @Controller('events')
@@ -52,7 +52,7 @@ export class SseController {
 
         try {
 
-            const collection = this.mongoSvc.getCollection<GatewayEvent>('events');
+            const collection = this.mongoSvc.getCollection<IncomingGatewayEvent>('events');
 
             const events = await collection
                 .find({ createdAt: { $gt: since } })

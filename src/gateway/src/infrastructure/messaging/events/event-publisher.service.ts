@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { MongoService } from '../../database/mongo/mongo.service';
 import { RedisService } from '../../cache/redis/redis.service';
-import { GatewayEvent } from 'gateway-contracts';
+import { IncomingGatewayEvent } from 'gateway-contracts';
 
 @Injectable()
 export class EventPublisherService {
@@ -19,7 +19,7 @@ export class EventPublisherService {
      * - Persist to MongoDB (event log / audit trail)
      * - Publish to Redis (real-time fanout)
      */
-    async publish(event: GatewayEvent): Promise<void> {
+    async publish(event: IncomingGatewayEvent): Promise<void> {
 
         try {
 
@@ -42,7 +42,7 @@ export class EventPublisherService {
     /**
      * Store event in MongoDB (durable log)
      */
-    private async persist(event: GatewayEvent): Promise<void> {
+    private async persist(event: IncomingGatewayEvent): Promise<void> {
 
         const collection = this.mongoService.getCollection('events');
 

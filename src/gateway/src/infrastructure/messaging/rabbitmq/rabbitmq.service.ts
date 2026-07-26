@@ -6,9 +6,9 @@ import { ConfigService } from '@nestjs/config';
 import { RabbitMqHealthDto } from './dto/rabbitmq-health.dto';
 import { QUEUE_NAMES } from '../../../common/constants/queue.constants';
 import { DEFAULT_URL } from '../../../common/constants/rabbitmq.constants';
-import { GatewayEvent } from 'gateway-contracts';
+import { IncomingGatewayEvent } from 'gateway-contracts';
 
-export interface BufferedEvent<T extends GatewayEvent> {
+export interface BufferedEvent<T extends IncomingGatewayEvent> {
     timestamp: number;
     payload: T;
 }
@@ -24,7 +24,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     private flushIntervalMs = 1000;
     private lastPublishAttempt?: Date;
     
-    private readonly eventBuffer: BufferedEvent<GatewayEvent>[] = [];
+    private readonly eventBuffer: BufferedEvent<IncomingGatewayEvent>[] = [];
 
     constructor(private readonly logger: PinoLogger,
         private readonly cfgSvc: ConfigService) { }
@@ -149,7 +149,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         }, this.flushIntervalMs);
     }
 
-    async publish<T extends GatewayEvent>(event: T): Promise<void> {
+    async publish<T extends IncomingGatewayEvent>(event: T): Promise<void> {
 
         this.lastPublishAttempt = new Date();
 

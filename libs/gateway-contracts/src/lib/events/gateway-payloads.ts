@@ -59,5 +59,3 @@ export interface EnrichedGatewayLaunch {
   payloads: GatewayPayload[];
   ships: GatewayShip[];
 }
-
-export type SpaceXData = Record<string, unknown>;

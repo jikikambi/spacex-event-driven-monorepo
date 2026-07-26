@@ -1,6 +1,7 @@
 import { GatewayMetadata } from "../gateway-metadata";
+import { GatewayEvents } from '../../constants/gateway-events.constant';
 
 export interface OtherEvent extends GatewayMetadata {
-    event: "OTHER_EVENT",
-    payload: any
+    event: typeof GatewayEvents.OTHER_EVENT;
+    payload: unknown;
 }

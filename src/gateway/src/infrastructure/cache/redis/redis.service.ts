@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PinoLogger } from 'nestjs-pino';
 import { RedisClientType, createClient } from 'redis';
 
+import type { SetOptions } from 'redis';
+
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
 
@@ -103,20 +105,39 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         return values.map(value => typeof value === 'string' ? value : null);
     }
 
-    async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
+    async setIfNotExists(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+
+        const result = await this.client.set(key, value, {
+
+            expiration: {
+
+                type: 'EX',
+                value: ttlSeconds
+            },
+            
+            condition: 'NX'
+        });
+
+        return result === 'OK';
+    }
+
+    async set(key: string, value: string, ttlSeconds?: number): Promise<string | null> {
+
+        const options: SetOptions = {};
 
         if (ttlSeconds) {
 
-            await this.client.set(key, value, { EX: ttlSeconds });
-
-            return;
+            options.expiration = {
+                type: 'EX',
+                value: ttlSeconds
+            };
         }
 
-        await this.client.set(key, value);
+        return await this.client.set(key, value, options) as string | null;
     }
 
     async delete(key: string): Promise<void> {
-        
+
         await this.client.del(key);
     }
 }

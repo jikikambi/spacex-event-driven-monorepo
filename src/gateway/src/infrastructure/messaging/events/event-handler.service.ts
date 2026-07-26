@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino";
-import { GatewayEvent } from "gateway-contracts";
+import { IncomingGatewayEvent } from "gateway-contracts";
 import { EventDeduplicationService } from "./event-deduplication.service";
 import { EventDispatcherService } from "./event-dispatcher.service";
 import { EventEnrichmentService } from "./event-enrichment.service";
@@ -16,7 +16,7 @@ export class EventHandlerService {
         this.logger.setContext(EventHandlerService.name);
     }
 
-    async handleEvent(event: GatewayEvent): Promise<void> {
+    async handleEvent(event: IncomingGatewayEvent): Promise<void> {
 
         if (!event.event || !event.payload) {
 

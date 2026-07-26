@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino/PinoLogger";
-import { GatewayEvent } from "gateway-contracts";
+import { IncomingGatewayEvent } from "gateway-contracts";
 import { LaunchIdentityService } from "./launch-identity.service";
 import { EventPersistenceService } from "./event-persistence.service";
 import { EventDistributionService } from "./event-distribution.service";
+import { GatewayEvents } from 'gateway-contracts';
 
 @Injectable()
 export class EventDispatcherService {
@@ -16,9 +17,9 @@ export class EventDispatcherService {
         this.logger.setContext(EventDispatcherService.name);
     }
 
-    async dispatch(event: GatewayEvent): Promise<void> {
+    async dispatch(event: IncomingGatewayEvent): Promise<void> {
         
-        if (event.event !== "ENRICH_LAUNCH") return;
+        if (event.event !== GatewayEvents.ENRICH_LAUNCHED) return;
 
         const { launchId, dedupKey } = this.identitySvc.getIdentity(event.payload);
 

@@ -2,8 +2,9 @@ import { Injectable, Inject, OnApplicationBootstrap } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino";
 import { SPACEX_PROVIDER_TOKEN } from "../common/constants/spacex.constants";
 import { RabbitMQService } from "../infrastructure/messaging/rabbitmq/rabbitmq.service";
-import { GatewayEvent, GatewayLaunch } from "gateway-contracts";
+import { IncomingGatewayEvent, GatewayLaunch } from "gateway-contracts";
 import { ISpaceXProvider } from "../infrastructure/external/spacex/spacex.provider";
+import { GatewayEvents } from "gateway-contracts";
 
 @Injectable()
 export class LaunchBootstrapService implements OnApplicationBootstrap {
@@ -41,9 +42,9 @@ export class LaunchBootstrapService implements OnApplicationBootstrap {
 
     private async publishLaunch(launch: GatewayLaunch): Promise<void> {
 
-        const event: GatewayEvent = {
+        const event: IncomingGatewayEvent = {
 
-            event: "LAUNCH_RECEIVED",
+            event: GatewayEvents.LAUNCH_RECEIVED,
 
             eventId: crypto.randomUUID(),
 

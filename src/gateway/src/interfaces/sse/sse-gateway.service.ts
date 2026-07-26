@@ -3,7 +3,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { Response } from 'express';
 import { randomUUID } from 'crypto';
 import { REDIS_KEYS } from '../../common/constants/redis.constants';
-import { GatewayEvent } from 'gateway-contracts';
+import { EnrichLaunchEvent } from 'gateway-contracts';
 import { RedisService } from '../../infrastructure/cache/redis/redis.service';
 
 @Injectable()
@@ -34,7 +34,6 @@ export class SseGatewayService {
         this.logger.info({ clientId, clients: this.clients.size }, '[SSE] Client connected');
 
         return clientId;
-
     }
 
     unregisterClient(clientId: string): void {
@@ -42,7 +41,6 @@ export class SseGatewayService {
         this.clients.delete(clientId);
 
         this.logger.info({ clientId, clients: this.clients.size }, '[SSE] Client disconnected.');
-
     }
 
     async replayCachedEvents(clientId: string): Promise<void> {
@@ -56,8 +54,6 @@ export class SseGatewayService {
             this.logger.warn({ clientId }, '[SSE] Client not found');
 
             return;
-
-
         }
 
         /** Replay cached Redis events */
@@ -90,7 +86,7 @@ export class SseGatewayService {
     }
 
     /** Broadcast a GatewayEvent to all connected SSE clients */
-    broadcast(evt: GatewayEvent): void {
+    broadcast(evt: EnrichLaunchEvent): void {
 
         console.log("Broadcasting", evt.event, this.clients.size);
 
@@ -99,7 +95,6 @@ export class SseGatewayService {
             this.logger.debug({ event: evt.event }, 'No clients connected. Skipping broadcast');
 
             return;
-
         }
 
         const payload = `data: ${JSON.stringify(evt)}\n\n`;
@@ -120,7 +115,6 @@ export class SseGatewayService {
             }
 
             this.logger.info({ event: evt.event, clients: this.clients.size }, '[SSE] Broadcast complete');
-
         }
     }
 }

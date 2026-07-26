@@ -10,7 +10,7 @@ import { OtherEvent } from "./types/other-event";
 // -------------------------------
 
 // SpaceXEvent
-export type GatewayEvent =
+export type IncomingGatewayEvent =
   | LoadRocketsEvent
   | LoadShipsEvent
   | LoadPayloadsEvent

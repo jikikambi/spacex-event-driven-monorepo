@@ -1,12 +1,12 @@
-import { GatewayEvent } from "gateway-contracts";
+import { IncomingGatewayEvent } from "gateway-contracts";
 
 export class EventParser {
 
-    public parse(raw: string): GatewayEvent | null {
+    public parse(raw: string): IncomingGatewayEvent | null {
 
         try {
 
-            return JSON.parse(raw) as GatewayEvent;
+            return JSON.parse(raw) as IncomingGatewayEvent;
 
         }
         catch (error) {

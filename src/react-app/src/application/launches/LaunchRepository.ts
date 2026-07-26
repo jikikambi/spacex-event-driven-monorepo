@@ -1,4 +1,4 @@
-import { EnrichLaunchEvent, EnrichedGatewayLaunch, GatewayEvent } from "gateway-contracts";
+import { EnrichLaunchEvent, EnrichedGatewayLaunch, IncomingGatewayEvent, GatewayEvents } from "gateway-contracts";
 import { EventListener } from "../../infrastructure/events/types/EventListener";
 import { EventClient } from "../../infrastructure/events/client";
 
@@ -92,9 +92,9 @@ export class LaunchRepository {
 
     }
 
-    private handleEvent(event: GatewayEvent): void {
+    private handleEvent(event: IncomingGatewayEvent): void {
 
-        if (event.event !== "ENRICH_LAUNCH") return;
+        if (event.event !== GatewayEvents.ENRICH_LAUNCHED) return;
 
         this.upsert(event);
 

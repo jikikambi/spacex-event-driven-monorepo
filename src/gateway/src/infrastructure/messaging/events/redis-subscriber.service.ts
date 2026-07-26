@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { RedisService } from '../../cache/redis/redis.service';
-import { GatewayRocket, GatewayShip, GatewayPayload, EnrichedGatewayLaunch, GatewayEvent } from 'gateway-contracts';
 import { REDIS_CHANNELS } from '../../../common/constants/redis.constants';
 import { SseGatewayService } from '../../../interfaces/sse/sse-gateway.service';
+import { GatewayEvents } from 'gateway-contracts';
+import { EnrichLaunchEventSchema, GatewayEventMapper } from '../../../schemas';
+import { LaunchIdentityService } from './launch-identity.service';
 
 @Injectable()
 export class RedisSubscriberService {
 
     constructor(private readonly redisSvc: RedisService,
+        private readonly identitySvc: LaunchIdentityService,
         private readonly sseGwSvc: SseGatewayService,
         private readonly logger: PinoLogger) {
 
@@ -21,77 +24,66 @@ export class RedisSubscriberService {
 
         this.logger.info(`[Redis Subscriber] Listening on ${REDIS_CHANNELS.EVENTS} channel`);
 
-        await client.subscribe(REDIS_CHANNELS.EVENTS, async (message: string) => {
-
-            await this.handleMessage(message);
-        });
+        await client.subscribe(REDIS_CHANNELS.EVENTS, async (message: string) => await this.handleMessage(message));
     }
 
     private async handleMessage(message: string): Promise<void> {
 
         try {
 
-            const parsed = JSON.parse(message) as GatewayEvent & { source?: string; };
+            let raw: unknown;
 
-            // Skip self-published events
-            if (parsed.source === 'gateway') return;
+            try {
 
-            const launchId = this.extractLaunchId(parsed);
+                raw = JSON.parse(message);
+            }
+            catch {
 
-            if (!launchId) {
-                this.logger.warn({ event: parsed.event }, '[Redis Subscriber] Event missing launch id');
+                this.logger.warn('[Redis] Invalid JSON message');
+
                 return;
             }
 
-            const dedupKey = `event:${launchId}`;
+            const result = EnrichLaunchEventSchema.safeParse(raw);
 
-            const exists = await this.redisSvc.get(dedupKey);
+            if (!result.success) {
 
-            if (exists) return;
+                this.logger.warn({ issues: result.error.issues }, '[Redis] Invalid event schema');
 
-            await this.redisSvc.set(dedupKey, '1', 3600);
+                return;
+            }
 
-            const event = this.normalizeEvent(parsed);
+            const event = GatewayEventMapper.toDomain(result.data);
+
+            // Ignore events published by this Gateway instance.
+            if (event.source === 'gateway' && event.event !== GatewayEvents.ENRICH_LAUNCHED) return;
+
+            const { launchId, dedupKey } = this.identitySvc.getIdentity(event.payload);
+
+            if (!launchId) {
+
+                this.logger.warn('[Redis Subscriber] ENRICH_LAUNCHED missing launch id');
+
+                return;
+            }
+
+            const acquired = await this.redisSvc.setIfNotExists(dedupKey, '1', 3600);
+
+            if (!acquired) {
+
+                this.logger.debug({ launchId }, '[Redis] Duplicate event ignored');
+
+                return;
+            }
 
             this.sseGwSvc.broadcast(event);
 
-            this.logger.info({ event: event.event, launchId }, '[Redis Subscriber] Processed event');
+            this.logger.info({ launchId }, '[Redis] Event broadcast to SSE clients');
+
         }
         catch (error) {
 
             this.logger.error({ error }, '[Redis Subscriber] Failed to process message');
-        }
-    }
-
-    // 
-    private extractLaunchId(parsed: GatewayEvent & { source?: string }): string | null {
-
-        return (parsed.payload as any)?.id || (parsed.payload as any)?.launch?.id || null;
-    }
-
-    private normalizeEvent(parsed: GatewayEvent): GatewayEvent {
-
-        switch (parsed.event) {
-
-            case 'LOAD_ROCKETS':
-
-                return { event: 'LOAD_ROCKETS', payload: parsed.payload as GatewayRocket[], timestamp: parsed.timestamp, source: parsed.source };
-
-            case 'LOAD_SHIPS':
-
-                return { event: 'LOAD_SHIPS', payload: parsed.payload as GatewayShip[], timestamp: parsed.timestamp, source: parsed.source };
-
-            case 'LOAD_PAYLOADS':
-
-                return { event: 'LOAD_PAYLOADS', payload: parsed.payload as GatewayPayload[], timestamp: parsed.timestamp, source: parsed.source };
-
-            case 'ENRICH_LAUNCH':
-
-                return { event: 'ENRICH_LAUNCH', payload: parsed.payload as EnrichedGatewayLaunch, timestamp: parsed.timestamp, source: parsed.source };
-
-            default:
-
-                return { event: 'OTHER_EVENT', payload: parsed.payload, timestamp: parsed.timestamp, source: parsed.source };
         }
     }
 }

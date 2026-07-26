@@ -22,7 +22,7 @@ export interface Core {
 
 export interface Failure {
   time: number
-  altitude: any
+  altitude: number | null;
   reason: string
 }
 
@@ -34,15 +34,23 @@ export interface Launch {
   date_local: string;
   date_precision: string;
   success: boolean | null;
+  upcoming: boolean;
   details: string | null;
   rocket: string;
   launchpad: string;
+  window: number | null;
+  net: boolean;
+  tbd: boolean;
+  auto_update: boolean;
+  flight_number: number;
+  static_fire_date_utc: string | null;
+  static_fire_date_unix: number | null;
   fairings: {
-    reused: boolean;
-    recovery_attempt: boolean
-    recovered: boolean
+    reused: boolean | null;
+    recovery_attempt: boolean | null
+    recovered: boolean | null
     ships: string[]
-  }
+  } | null
   links: {
     patch: { small: string | null; large: string | null };
     reddit: {
@@ -61,22 +69,11 @@ export interface Launch {
     article: string | null;
     wikipedia: string | null;
   };
-  static_fire_date_utc: string;
-  static_fire_date_unix: number;
-  telemetry?: {
-    flight_club: string | null;
-  } | null;
-  upcoming: boolean;
   cores: Core[];
-  [key: string]: any; // optional: to allow other fields you don’t type yet
   ships: string[];
   payloads: string[];
   crew: string[];
   capsules: string[];
   failures: Failure[];
-  window: number;
-  net: boolean;
-  tbd: boolean;
-  auto_update: boolean;
-  flight_number: number;
+  [key: string]: any; // optional: to allow other fields you don’t type yet
 }

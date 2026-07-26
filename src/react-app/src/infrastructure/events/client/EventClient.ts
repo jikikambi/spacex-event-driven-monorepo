@@ -1,12 +1,12 @@
 
-import { GatewayEvent } from "gateway-contracts";
+import { IncomingGatewayEvent } from "gateway-contracts";
 import { EventListener } from "../types/EventListener";
 import { EventParser } from "../parser/EventParser";
 import { EventConnection } from "../connection/EventConnection";
 
 export class EventClient {
 
-    private readonly listeners = new Set<EventListener<GatewayEvent>>();
+    private readonly listeners = new Set<EventListener<IncomingGatewayEvent>>();
 
     private readonly unsubscribeConnection: () => void;
 
@@ -28,12 +28,12 @@ export class EventClient {
         this.connection.connect();
     }
 
-    public notify(event: GatewayEvent): void {
+    public notify(event: IncomingGatewayEvent): void {
 
         this.listeners.forEach(listener => listener(event));
     }
 
-    public subscribe(listener: EventListener<GatewayEvent>): () => void {
+    public subscribe(listener: EventListener<IncomingGatewayEvent>): () => void {
 
         this.listeners.add(listener);
 

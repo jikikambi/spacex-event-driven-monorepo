@@ -1,8 +1,8 @@
 //SpaceXEventType
 export type GatewayEventType =
-  | "LOAD_ROCKETS"
-  | "LOAD_SHIPS"
-  | "LOAD_PAYLOADS"
+  | "ROCKETS_LOADED"
+  | "SHIPS_LOADED"
+  | "PAYLOADS_LOADED"
   | "LAUNCH_RECEIVED"
-  | "ENRICH_LAUNCH"
+  | "ENRICH_LAUNCHED"
   | "OTHER_EVENT";

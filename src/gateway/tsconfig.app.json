@@ -11,7 +11,7 @@
     "target": "es2021",
     "moduleResolution": "node",
   },
-  "include": ["src/**/*.ts", "../types/global.d.ts"],
+  "include": ["src/**/*.ts", "../types/global.d.ts", "../../libs/gateway-contracts/src/lib/constants/gateway-events.constant.ts"],
   "exclude": [
     "jest.config.ts",
     "jest.config.cts",

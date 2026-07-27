@@ -1,3 +1,4 @@
+import { Launchpad } from "spacex-types";
 import { z } from "zod";
 
 export const LaunchpadSchema = z.object({
@@ -43,3 +44,10 @@ export const LaunchpadSchema = z.object({
 }).loose().strict();
 
 export type LaunchpadValidated = z.infer<typeof LaunchpadSchema>;
+
+export class LaunchpadMapper {
+
+    static toModel(model: LaunchpadValidated): Launchpad {
+        return model as Launchpad;
+    }
+}

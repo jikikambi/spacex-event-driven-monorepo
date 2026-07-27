@@ -1,3 +1,4 @@
+import { Rocket } from "spacex-types";
 import { z } from "zod";
 
 const DimensionSchema = z.object({
@@ -152,3 +153,10 @@ export const RocketSchema = z.object({
 }).loose().strict();
 
 export type RocketValidated = z.infer<typeof RocketSchema>;
+
+export class RocketMapper {
+
+    static toModel(model: RocketValidated): Rocket {
+        return model as Rocket;
+    }
+}

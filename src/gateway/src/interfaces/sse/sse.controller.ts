@@ -2,7 +2,7 @@ import { Controller, Get, MessageEvent, Query, Req, Res, Sse } from '@nestjs/com
 import type { Request, Response } from 'express';
 import { PinoLogger } from 'nestjs-pino';
 import { SseGatewayService } from './sse-gateway.service';
-import { IncomingGatewayEvent } from 'gateway-contracts';
+import { EnrichLaunchEvent, IncomingGatewayEvent } from 'gateway-contracts';
 import { MongoService } from '../../infrastructure/database/mongo/mongo.service';
 
 @Controller('events')
@@ -48,11 +48,9 @@ export class SseController {
 
     private async replayEvents(res: Response, since: Date): Promise<void> {
 
-        //console.log(since);
-
         try {
 
-            const collection = this.mongoSvc.getCollection<IncomingGatewayEvent>('events');
+            const collection = this.mongoSvc.getCollection<EnrichLaunchEvent>('events');
 
             const events = await collection
                 .find({ createdAt: { $gt: since } })

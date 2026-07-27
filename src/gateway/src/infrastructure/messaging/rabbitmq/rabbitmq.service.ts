@@ -23,7 +23,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     private flushTimer?: NodeJS.Timeout;
     private flushIntervalMs = 1000;
     private lastPublishAttempt?: Date;
-    
+
     private readonly eventBuffer: BufferedEvent<IncomingGatewayEvent>[] = [];
 
     constructor(private readonly logger: PinoLogger,
@@ -73,7 +73,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
                     this.channel = await this.connection.createChannel();
 
-                    await this.channel.assertQueue(this.queueName, { durable: true });
+                    await this.assertQueues(this.channel); //this.channel.assertQueue(this.queueName, { durable: true });
 
                     this.logger.info(`Connected to RabbitMQ. Queue: ${this.queueName} asserted`);
 
@@ -104,49 +104,6 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
     isConnected(): boolean {
         return !!this.channel;
-    }
-
-    private registerEvents(): void {
-
-        this.connection?.on('close', () => {
-
-            this.logger.warn('[RabbitMQ] connection closed, reconnecting...');
-
-            this.channel = null;
-            this.connection = null;
-
-            setTimeout(() => this.connect(), 5000);
-        });
-
-        this.connection?.on('error', (err) => {
-            this.logger.error(`[RabbitMQ] Connection error: ${err.message || err}`, err.stack);
-        });
-    }
-
-    /** Flush buffered events periodically */
-    private startFlushing(): void {
-
-        if (this.flushTimer) return;
-
-        this.flushTimer = setInterval(async () => {
-
-            if (!this.channel || this.eventBuffer.length === 0) return;
-
-            this.logger.info(`[RabbitMQ] Flushing ${this.eventBuffer.length} messages`);
-
-            const events = this.eventBuffer.splice(0, this.eventBuffer.length);
-
-            for (const event of events) {
-
-                try {
-                    await this.publish(event.payload);
-                }
-                catch (error) {
-                    this.logger.error("[RabbitMQ] Failed to flush buffered event, re-buffering:", error instanceof Error ? error?.message || error : undefined);
-                    this.eventBuffer.push(event);
-                }
-            }
-        }, this.flushIntervalMs);
     }
 
     async publish<T extends IncomingGatewayEvent>(event: T): Promise<void> {
@@ -199,6 +156,110 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         this.connection = null;
 
         this.logger.info('[RabbitMQ] Closed gracefully');
+    }
+
+    private async assertQueues(channel: Channel): Promise<void> {
+
+        const dlq = `${this.queueName}.dlq`;
+        const retry = `${this.queueName}.retry`;
+
+        /*
+         * Dead Letter Queue
+         */
+        await channel.assertQueue(dlq, { durable: true });
+
+        /*
+         * Retry queue
+         *
+         * After TTL expires:
+         * retry queue -> original queue
+         */
+        await channel.assertQueue(retry,
+            {
+                durable: true,
+
+                arguments: {
+
+                    // wait 30 seconds
+                    'x-message-ttl': 30000,
+
+                    // send back to original queue
+                    'x-dead-letter-exchange': '',
+
+                    // default exchange routing key
+                    'x-dead-letter-routing-key': this.queueName
+                }
+            }
+        );
+
+        /*
+         * Main queue
+         *
+         * nack(msg,false,false)
+         * sends message here
+         */
+        await channel.assertQueue(this.queueName,
+            {
+                durable: true,
+
+                arguments: {
+
+                    'x-dead-letter-exchange': '',
+
+                    'x-dead-letter-routing-key': dlq
+                }
+            }
+        );
+
+        this.logger.info(
+            {
+                queue: this.queueName,
+                dlq,
+                retry
+            }, '[RabbitMQ] Queue topology ready');
+    }
+
+    private registerEvents(): void {
+
+        this.connection?.on('close', () => {
+
+            this.logger.warn('[RabbitMQ] connection closed, reconnecting...');
+
+            this.channel = null;
+            this.connection = null;
+
+            setTimeout(() => this.connect(), 5000);
+        });
+
+        this.connection?.on('error', (err) => {
+            this.logger.error(`[RabbitMQ] Connection error: ${err.message || err}`, err.stack);
+        });
+    }
+
+    /** Flush buffered events periodically */
+    private startFlushing(): void {
+
+        if (this.flushTimer) return;
+
+        this.flushTimer = setInterval(async () => {
+
+            if (!this.channel || this.eventBuffer.length === 0) return;
+
+            this.logger.info(`[RabbitMQ] Flushing ${this.eventBuffer.length} messages`);
+
+            const events = this.eventBuffer.splice(0, this.eventBuffer.length);
+
+            for (const event of events) {
+
+                try {
+                    await this.publish(event.payload);
+                }
+                catch (error) {
+                    this.logger.error("[RabbitMQ] Failed to flush buffered event, re-buffering:", error instanceof Error ? error?.message || error : undefined);
+                    this.eventBuffer.push(event);
+                }
+            }
+        }, this.flushIntervalMs);
     }
 
     /** Expose health info for monitoring */

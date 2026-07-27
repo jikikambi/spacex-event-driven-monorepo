@@ -1,3 +1,4 @@
+import { Ship } from "spacex-types";
 import { z } from "zod";
 
 export const ShipSchema = z.object({
@@ -53,3 +54,10 @@ export const ShipSchema = z.object({
 }).loose().strict();
 
 export type ShipValidated = z.infer<typeof ShipSchema>;
+
+export class ShipMapper {
+
+    static toModel(model: ShipValidated): Ship {
+        return model as Ship;
+    }
+}

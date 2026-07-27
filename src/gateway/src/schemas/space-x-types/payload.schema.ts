@@ -1,3 +1,4 @@
+import { Payload } from "spacex-types";
 import { z } from "zod";
 
 const DragonSchema = z.object({
@@ -79,3 +80,10 @@ export const PayloadSchema = z.object({
 }).loose().strict();
 
 export type PayloadValidated = z.infer<typeof PayloadSchema>;
+
+export class PayloadMapper {
+
+    static toModel(model: PayloadValidated): Payload {
+        return model as Payload;
+    }
+}

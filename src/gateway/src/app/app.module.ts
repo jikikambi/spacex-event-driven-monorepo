@@ -12,7 +12,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MetricsInterceptor } from '../observability/metrics/metrics.Interceptor';
 import { OpenTelemetryService } from '../observability/telemetry/opentelemetry.service';
 import { GatewayLifecycleService } from '../bootstrap/gateway-lifecycle.service';
-import { RedisModule } from '../infrastructure/cache/redis/redis.module';
+import { RedisModule } from '../infrastructure/datastore/redis/redis.module';
 import { RabbitMQModule } from '../infrastructure/messaging/rabbitmq/rabbitmq.module';
 import { EventsModule } from '../infrastructure/messaging/events/events.module';
 import { ObservabilityModule } from '../observability/observability.module';

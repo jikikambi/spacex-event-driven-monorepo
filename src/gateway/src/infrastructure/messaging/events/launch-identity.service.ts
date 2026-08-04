@@ -1,17 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { EnrichedGatewayLaunch } from "gateway-contracts";
+import { EnrichedGatewayLaunch, IncomingGatewayEvent } from "gateway-contracts";
 
 @Injectable()
 export class LaunchIdentityService {
 
-    getIdentity(payload: EnrichedGatewayLaunch) {
+    getLaunchId(payload: EnrichedGatewayLaunch): string | undefined {
 
-        const launchId = payload.launch?.id;
+        return payload.launch?.id;
 
-        return {
-            
-            launchId,
-            dedupKey: `event:${launchId}`
-        };
     }
+
+    getEventId(event: IncomingGatewayEvent): string | undefined {
+
+        return event.eventId;
+
+    }
+    
 }

@@ -1,4 +1,10 @@
-export const REDIS_KEYS = { EVENTS: 'event:*' } as const;
+export const REDIS_KEYS = {
+
+    DEDUP: "dedup:*",
+
+    FANOUT: "fanout:*",
+
+} as const;
 
 export const REDIS_CHANNELS = { EVENTS: 'events' } as const;
 

@@ -1,6 +1,4 @@
-import { GatewayPayload, GatewayRocket, GatewayShip } from 'gateway-contracts';
 import { z } from 'zod';
-
 
 export const GatewayRocketSchema = z.object({
 

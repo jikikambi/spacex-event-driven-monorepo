@@ -13,6 +13,6 @@ export default {
       },
     ],
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
+  moduleFileExtensions: ['ts', 'js', 'json', 'html'],
   coverageDirectory: '../../coverage/gateway-e2e',
 };

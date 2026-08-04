@@ -3,15 +3,17 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
-    "types": ["node"],
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "types": [
+      "node",
+      "jest"
+    ],
     "target": "es2021",
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
   },
-  "include": ["src/**/*.ts", "../types/global.d.ts", "../../libs/gateway-contracts/src/lib/constants/gateway-events.constant.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../types/global.d.ts"
+  ],
   "exclude": [
     "jest.config.ts",
     "jest.config.cts",

@@ -12,8 +12,9 @@ export class EventHandlerService {
         private readonly enrichSvc: EventEnrichmentService,
         private readonly dedupSvc: EventDeduplicationService,
         private readonly dispatcherSvc: EventDispatcherService) {
-            
+
         this.logger.setContext(EventHandlerService.name);
+        
     }
 
     async handleEvent(event: IncomingGatewayEvent): Promise<void> {
@@ -28,16 +29,20 @@ export class EventHandlerService {
         try {
 
             const enrichedEvent = await this.enrichSvc.enrich(event);
-
+            
             const shouldProcess = await this.dedupSvc.shouldProcess(enrichedEvent);
-
-            if (!shouldProcess)  return;
+            
+            if (!shouldProcess) return;
 
             await this.dispatcherSvc.dispatch(enrichedEvent);
+
         }
         catch (error) {
 
             this.logger.error(error instanceof Error ? error.message ?? error : undefined, `[Gateway] handleEvent failed for ${event.event}`);
+
         }
+
     }
+
 }

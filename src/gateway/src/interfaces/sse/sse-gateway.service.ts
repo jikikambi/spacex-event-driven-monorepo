@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { randomUUID } from 'crypto';
 import { REDIS_KEYS } from '../../common/constants/redis.constants';
 import { EnrichLaunchEvent } from 'gateway-contracts';
-import { RedisService } from '../../infrastructure/cache/redis/redis.service';
+import { RedisService } from '../../infrastructure/datastore/redis/redis.service';
 
 @Injectable()
 export class SseGatewayService {
@@ -34,6 +34,13 @@ export class SseGatewayService {
         this.logger.info({ clientId, clients: this.clients.size }, '[SSE] Client connected');
 
         return clientId;
+
+    }
+
+    get getClients(): Map<string, Response> {
+
+        return this.clients;
+
     }
 
     unregisterClient(clientId: string): void {
@@ -41,6 +48,7 @@ export class SseGatewayService {
         this.clients.delete(clientId);
 
         this.logger.info({ clientId, clients: this.clients.size }, '[SSE] Client disconnected.');
+
     }
 
     async replayCachedEvents(clientId: string): Promise<void> {
@@ -54,47 +62,44 @@ export class SseGatewayService {
             this.logger.warn({ clientId }, '[SSE] Client not found');
 
             return;
+
         }
 
         /** Replay cached Redis events */
         try {
 
-            const keys = await this.redisSvc.keys(REDIS_KEYS.EVENTS);
-
-            //console.log(keys);
+            const keys = await this.redisSvc.keys(REDIS_KEYS.FANOUT);
 
             if (keys.length > 0) {
 
                 const cachedEvents = await this.redisSvc.mGet(keys);
 
-                //console.log(cachedEvents);
-
                 cachedEvents
                     .filter((evt): evt is string => evt !== null)
-                    .forEach((evt) => {
-                        //console.log("Sending SSE", evt);
-                        res.write(`data: ${evt}\n\n`);
-                    });
+                    .forEach((evt) => res.write(`data: ${evt}\n\n`));
 
                 this.logger.info({ clientId, count: cachedEvents.length }, '[SSE] Replayed cached events');
+
             }
+
         }
         catch (error) {
 
             this.logger.error(error instanceof Error ? error.message ?? error : undefined, '[SSE] Failed to to replay Redis cache for new client');
+
         }
+
     }
 
     /** Broadcast a GatewayEvent to all connected SSE clients */
     broadcast(evt: EnrichLaunchEvent): void {
 
-        console.log("Broadcasting", evt.event, this.clients.size);
-
-        if (this.clients.size === 0) {
+        if (this.getClients.size === 0) {
 
             this.logger.debug({ event: evt.event }, 'No clients connected. Skipping broadcast');
 
             return;
+            
         }
 
         const payload = `data: ${JSON.stringify(evt)}\n\n`;
@@ -116,5 +121,7 @@ export class SseGatewayService {
 
             this.logger.info({ event: evt.event, clients: this.clients.size }, '[SSE] Broadcast complete');
         }
+
     }
+
 }

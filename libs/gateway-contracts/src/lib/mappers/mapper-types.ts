@@ -1,5 +1,49 @@
-import { Payload, Rocket, Ship } from "spacex-types";
-import { GatewayPayload, GatewayRocket, GatewayShip } from "../events/gateway-payloads";
+import { Launch, Payload, Rocket, Ship } from "spacex-types";
+import { GatewayLaunch, GatewayPayload, GatewayRocket, GatewayShip } from "../events/gateway-payloads";
+
+export function mapLaunch(launch: Launch): GatewayLaunch {
+
+    return {
+
+        id: launch.id,
+
+        name: launch.name,
+
+        upcoming: launch.upcoming,
+
+        date_utc: launch.date_utc,
+
+        success: launch.success,
+
+        details: launch.details,
+
+        rocket: launch.rocket,
+
+        payloads: [...launch.payloads],
+
+        ships: [...launch.ships],
+
+        links: {
+
+            patch: {
+
+                small: launch.links.patch.small,
+
+                large: launch.links.patch.large,
+
+            },
+
+            webcast: launch.links.webcast,
+
+            article: launch.links.article,
+
+            wikipedia: launch.links.wikipedia,
+
+        }
+
+    };
+
+}
 
 export function mapRocket(rocket: Rocket | null): GatewayRocket | null {
 
@@ -17,7 +61,7 @@ export function mapRocket(rocket: Rocket | null): GatewayRocket | null {
             kg: rocket.mass.kg,
             lb: rocket.mass.lb
         }
-    
+
     };
 }
 
@@ -41,4 +85,3 @@ export function mapShip(ship: Ship): GatewayShip {
         mass_kg: ship.mass_kg
     };
 }
-

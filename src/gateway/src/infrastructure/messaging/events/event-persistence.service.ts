@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino";
 import { EnrichLaunchEvent } from "gateway-contracts";
 import { EnrichedGatewayLaunch } from "gateway-contracts";
-import { MongoService } from "../../database/mongo/mongo.service";
+import { MongoService } from "../../datastore/mongo/mongo.service";
 
 @Injectable()
 export class EventPersistenceService {
@@ -19,5 +19,6 @@ export class EventPersistenceService {
         this.logger.info({ insertedId: result.insertedId }, `[MongoDB] Persisted event: ${event.event}`);
 
         return result;
+
     }
 }

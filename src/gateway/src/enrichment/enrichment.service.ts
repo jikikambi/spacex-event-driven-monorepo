@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { RedisService } from '../infrastructure/cache/redis/redis.service';
+import { RedisService } from '../infrastructure/datastore/redis/redis.service';
 import { EnrichedGatewayLaunch, mapRocket, mapPayload, mapShip } from 'gateway-contracts';
 import { SPACEX_PROVIDER_TOKEN } from '../common/constants/spacex.constants';
 import { ISpaceXProvider } from '../infrastructure/external/spacex/spacex.provider';
@@ -13,7 +13,8 @@ export class EnrichmentService {
         private readonly redisSvc: RedisService,
         @Inject(SPACEX_PROVIDER_TOKEN) private readonly provider: ISpaceXProvider) {
 
-        this.logger.setContext(EnrichmentService.name)
+        this.logger.setContext(EnrichmentService.name);
+
     }
 
     async buildEnrichedLaunch(id: string): Promise<EnrichedGatewayLaunch> {
@@ -43,6 +44,7 @@ export class EnrichmentService {
             this.provider.fetchPayloads(launch.payloads ?? []),
 
             this.provider.fetchShips(launch.ships ?? [])
+
         ]);
 
         const enriched: EnrichedGatewayLaunch =
@@ -61,6 +63,7 @@ export class EnrichmentService {
         this.logger.debug({ cacheKey }, 'Cached enriched launch.');
 
         return enriched;
+
     }
 
     private validateCachedLaunch(cacheKey: string, json: string): EnrichedGatewayLaunch | null {
@@ -74,10 +77,15 @@ export class EnrichmentService {
             if (!result.success) {
 
                 this.logger.warn(
+
                     {
                         cacheKey,
+
                         issues: result.error.issues
-                    }, "Invalid cached enriched launch. Cache entry will be ignored.");
+
+                    }, 
+                    
+                    "Invalid cached enriched launch. Cache entry will be ignored.");
 
                 // Fire-and-forget.
                 void this.redisSvc.delete(cacheKey);
@@ -87,18 +95,26 @@ export class EnrichmentService {
 
             // Boundary crossed.
             return EnrichedGatewayLaunchMapper.toDomain(result.data);
+
         }
         catch (error) {
 
             this.logger.warn(
+
                 {
                     cacheKey,
+
                     error
-                }, "Corrupted cached enriched launch.");
+
+                }, 
+                
+                "Corrupted cached enriched launch.");
 
             void this.redisSvc.delete(cacheKey);
 
             return null;
         }
+
     }
+
 }

@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { EnrichedGatewayLaunchSchema } from './enriched-gateway-launch-schema';
-import { EnrichedGatewayLaunch, IncomingGatewayEvent, GatewayEvents, EnrichLaunchEvent } from 'gateway-contracts';
+import { GatewayEvents, EnrichLaunchEvent } from 'gateway-contracts';
 import { GatewayPayloadSchema, GatewayRocketSchema, GatewayShipSchema } from './gateway-payload-schemas';
-
 
 const GatewayMetadataSchema = z.object({
     eventId: z.uuid().optional(),
@@ -73,5 +72,7 @@ export class GatewayEventMapper {
     static toDomain(event: GatewayEventValidated): EnrichLaunchEvent {
 
         return event as EnrichLaunchEvent;
+
     }
+    
 }

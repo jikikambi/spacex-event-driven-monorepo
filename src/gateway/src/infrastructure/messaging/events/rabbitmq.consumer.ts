@@ -9,21 +9,23 @@ import { QUEUE_NAMES } from "../../../common/constants/queue.constants";
 @Injectable()
 export class RabbitMQConsumer {
 
+    private consumerTag?: string;
+
     constructor(private readonly cfgSvc: ConfigService,
         private readonly logger: PinoLogger,
         private readonly handler: EventHandlerService) {
+
         this.logger.setContext(RabbitMQConsumer.name);
+
     }
 
     async start(channel: Channel) {
 
         const queue = this.cfgSvc.get<string>('RABBITMQ_QUEUE') ?? QUEUE_NAMES.SPACEX_EVENTS;
 
-        //await channel.assertQueue(queue, { durable: true });
-
         this.logger.info(`[RabbitMQ] Consuming messages from queue: ${queue}`);
 
-        await channel.consume(queue, async (msg) => {
+        const result = await channel.consume(queue, async (msg) => {
 
             this.logger.info(`[RabbitMQ] Received message: ${msg?.content.toString()}`);
 
@@ -51,6 +53,7 @@ export class RabbitMQConsumer {
                 await this.handler.handleEvent(evt);
 
                 channel.ack(msg);
+
             }
             catch (err) {
 
@@ -59,9 +62,23 @@ export class RabbitMQConsumer {
                 await this.sendToRetry(channel, queue, msg);
 
                 channel.nack(msg, false, false);
+
             }
 
         }, { noAck: false });
+
+        this.consumerTag = result.consumerTag;
+
+    }
+
+    async stop(channel: Channel) {
+
+        if (this.consumerTag) {
+
+            await channel.cancel(this.consumerTag);
+
+        }
+
     }
 
     private async sendToRetry(channel: Channel, queueName: string, msg: Message): Promise<void> {
@@ -74,27 +91,33 @@ export class RabbitMQConsumer {
 
         if (retryCount >= 3) {
 
-            this.logger.error(
-                {
-                    retryCount
-                },
-                '[RabbitMQ] Retry exhausted, sending to DLQ'
-            );
-
-            channel.nack(msg, false, false);
+            this.logger.error({ retryCount }, '[RabbitMQ] Retry exhausted, sending to DLQ');
 
             return;
+
         }
 
-        channel.sendToQueue(retryQueue, msg.content,
+        const published = channel.sendToQueue(retryQueue, msg.content,
             {
                 persistent: true,
 
                 headers: {
+
                     ...headers,
+
                     'x-retry-count': retryCount + 1
                 }
+
             }
+
         );
+
+        if (!published) {
+
+            this.logger.warn('[RabbitMQ] Retry queue write buffer is full');
+
+        }
+
     }
+    
 }

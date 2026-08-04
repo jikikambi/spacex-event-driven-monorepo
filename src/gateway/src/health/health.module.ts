@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { MongoModule } from "../infrastructure/database/mongo/mongo.module";
-import { RedisModule } from "../infrastructure/cache/redis/redis.module";
+import { MongoModule } from "../infrastructure/datastore/mongo/mongo.module";
+import { RedisModule } from "../infrastructure/datastore/redis/redis.module";
 import { RabbitMQModule } from "../infrastructure/messaging/rabbitmq/rabbitmq.module";
 import { HealthService } from "./health.service";
 import { HealthController } from "./health.controller";

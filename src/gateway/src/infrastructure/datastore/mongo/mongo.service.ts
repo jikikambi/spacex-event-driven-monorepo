@@ -16,11 +16,13 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
     async onModuleInit(): Promise<void> {
 
         await this.connect();
+        
     }
 
     async onModuleDestroy(): Promise<void> {
 
         await this.disconnect();
+
     }
 
     async connect(): Promise<void> {
@@ -39,19 +41,25 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
 
             this.db = this.client.db(database);
 
+            await this.ensureIndexes();
+
             this.logger.info({ database, url: mongoUrl }, '[MongoDB] Connected.');
+
         }
         catch (error) {
 
             this.logger.error(error instanceof Error ? error.message ?? error : undefined, '[MongoDB] Connection failed.');
 
             throw error;
+
         }
+
     }
 
     isConnected(): boolean {
 
         return this.client !== null && this.db !== null;
+
     }
 
     async disconnect(): Promise<void> {
@@ -63,13 +71,16 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
             await this.client.close();
 
             this.logger.info('[MongoDB] Connection closed.');
+
         }
         finally {
 
             this.client = null;
 
             this.db = null;
+
         }
+
     }
 
     getCollection<T extends Document>(name: string): Collection<T> {
@@ -77,10 +88,34 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
         if (!this.db) throw new Error('MongoDB has not been initialized.');
 
         return this.db.collection<T>(name);
+
     }
 
     getDatabase(): Db {
-        
-        return this.db!;
+
+        if (!this.db) throw new Error('MongoDB has not been initialized.');
+
+        return this.db;
+
     }
+
+    private async ensureIndexes(): Promise<void> {
+
+        try {
+
+            await this.getCollection('events').createIndex({ receivedAt: 1 }, { name: 'events_receivedAt_idx' });
+
+            this.logger.info('[MongoDB] Indexes ensured.');
+
+        }
+        catch (error) {
+
+            this.logger.error(error instanceof Error ? error.message : error, '[MongoDB] Failed creating indexes.');
+
+            throw error;
+            
+        }
+
+    }
+
 }

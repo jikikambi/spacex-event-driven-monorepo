@@ -22,5 +22,7 @@ export class EnrichedGatewayLaunchMapper {
     static toDomain(event: EnrichedGatewayLaunchValidated): EnrichedGatewayLaunch {
 
         return event as EnrichedGatewayLaunch;
+
     }
+    
 }

@@ -42,3 +42,13 @@ export const GatewayLaunchSchema = z.object({
 }).loose();//.catchall(z.unknown());
 
 export type GatewayLaunchValidated = z.infer<typeof GatewayLaunchSchema>;
+
+export class GatewayLaunchMapper {
+
+    static toDomain(event: GatewayLaunchValidated): GatewayLaunch {
+
+        return event as GatewayLaunch;
+
+    }
+    
+}

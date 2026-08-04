@@ -27,6 +27,7 @@ export class SpaceXApiService implements ISpaceXProvider {
         this.baseUrl = this.config.getOrThrow<string>('SPACEX_API');
 
         if (!this.baseUrl) throw new Error('SPACEX_API is not defined');
+        
     }
 
     async fetchLaunches(): Promise<Launch[]> {
@@ -55,11 +56,12 @@ export class SpaceXApiService implements ISpaceXProvider {
         });
 
         return payloadData;
+
     }
 
     async fetchLaunch(id: string): Promise<Launch> {
 
-        const url = `${this.baseUrl}/${id}`;
+        const url = `${this.baseUrl}/launches/${id}`;
 
         const data = await this.getUnknown(url, 'fetchLaunches');
 
@@ -77,19 +79,18 @@ export class SpaceXApiService implements ISpaceXProvider {
         }
 
         return LaunchMapper.toModel(result.data);
+
     }
 
     async fetchRocket(id: string): Promise<Rocket | null> {
 
         if (!id) return null;
 
-        const url = `${this.baseUrl.replace('/launches', '/rockets')}/${id}`;
+        const url = `${this.baseUrl}/rockets/${id}`;
 
         const data = await this.getUnknown(url, 'fetchRocket');
 
         const result = RocketSchema.safeParse(data);
-
-        console.log(result.data)
 
         if (!result.success) {
 
@@ -104,13 +105,14 @@ export class SpaceXApiService implements ISpaceXProvider {
         }
 
         return RocketMapper.toModel(result.data);
+
     }
 
     async fetchPayloads(ids: string[]): Promise<Payload[]> {
 
         if (!ids.length) return [];
 
-        const base = this.baseUrl.replace('/launches', '/payloads');
+        const base = `${this.baseUrl}/payloads`;
 
         const payloads = await Promise.all(ids.map(id => this.getUnknown(`${base}/${id}`, 'fetchPayload')));
 
@@ -134,13 +136,14 @@ export class SpaceXApiService implements ISpaceXProvider {
         });
 
         return payloadData;
+
     }
 
     async fetchShips(ids: string[]): Promise<Ship[]> {
 
         if (!ids.length) return [];
 
-        const base = this.baseUrl.replace('/launches', '/ships');
+        const base = `${this.baseUrl}/ships`;
 
         const ships = await Promise.all(ids.map(id => this.getUnknown(`${base}/${id}`, 'fetchShip')));
 
@@ -154,6 +157,7 @@ export class SpaceXApiService implements ISpaceXProvider {
                 }, '[SpaceX] Invalid ships response');
 
             throw new Error('Invalid SpaceX ships collection');
+
         }
 
         const payloadData: Ship[] = [];
@@ -161,16 +165,18 @@ export class SpaceXApiService implements ISpaceXProvider {
         result.data.forEach((payload: Ship) => {
 
             payloadData.push(ShipMapper.toModel(payload));
+
         });
 
         return payloadData;
+
     }
 
     async fetchLaunchpad(id: string): Promise<Launchpad | null> {
 
         if (!id) return null;
 
-        const url = `${this.baseUrl.replace('/launches', '/launchpads')}/${id}`;
+        const url = `${this.baseUrl}/launchpads/${id}`;
 
         const data = await this.getUnknown(url, 'fetchLaunchpad');
 
@@ -189,6 +195,7 @@ export class SpaceXApiService implements ISpaceXProvider {
         }
 
         return LaunchpadMapper.toModel(result.data);
+
     }
 
     private async getUnknown(url: string, operation: string): Promise<unknown> {
@@ -218,7 +225,9 @@ export class SpaceXApiService implements ISpaceXProvider {
                 }, '[SpaceX] API request failed');
 
             throw error;
+
         }
+
     }
 
     private logContext(operation: string) {
@@ -234,5 +243,7 @@ export class SpaceXApiService implements ISpaceXProvider {
 
             operation,
         };
+
     }
+
 }

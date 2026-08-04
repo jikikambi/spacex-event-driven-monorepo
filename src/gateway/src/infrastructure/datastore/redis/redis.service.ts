@@ -28,11 +28,13 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         });
 
         await this.connect();
+        
     }
 
     async onModuleDestroy() {
 
         await this.disconnect();
+
     }
 
     async connect(): Promise<void> {
@@ -40,7 +42,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         if (this.client.isOpen) return;
 
         try {
+
             await this.client.connect();
+
         }
         catch (error) {
 
@@ -48,11 +52,13 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
             throw error instanceof Error ? error.message ?? error : undefined;
         }
+
     }
 
     isConnected(): boolean {
 
         return !!this.client?.isReady;
+
     }
 
     async disconnect(): Promise<void> {
@@ -69,6 +75,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
             this.logger.error(error instanceof Error ? error.message ?? error : undefined, '[Redis] Failed to close connection');
         }
+
     }
 
     getClient(): RedisClientType<Record<string, never>, Record<string, never>> {
@@ -84,16 +91,19 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     async get(key: string): Promise<string | null> {
 
         return await this.client.get(key) as string | null;
+
     }
 
     async keys(pattern: string): Promise<string[]> {
 
         return this.client.keys(pattern);
+
     }
 
     async exists(key: string): Promise<boolean> {
 
         return (await this.client.exists(key)) === 1;
+
     }
 
     async mGet(keys: string[]): Promise<(string | null)[]> {
@@ -103,6 +113,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         const values = await this.client.mGet(keys);
 
         return values.map(value => typeof value === 'string' ? value : null);
+
     }
 
     async setIfNotExists(key: string, value: string, ttlSeconds: number): Promise<boolean> {
@@ -112,13 +123,37 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
             expiration: {
 
                 type: 'EX',
+
                 value: ttlSeconds
+
             },
             
             condition: 'NX'
+
         });
 
         return result === 'OK';
+
+    }
+
+    async setIfNotExistsWithValue(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+
+        const result = await this.client.set(key, value, {
+
+            expiration: {
+
+                type: 'EX',
+
+                value: ttlSeconds
+
+            },
+            
+            condition: 'NX'
+
+        });
+
+        return result === 'OK';
+        
     }
 
     async set(key: string, value: string, ttlSeconds?: number): Promise<string | null> {
@@ -128,8 +163,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         if (ttlSeconds) {
 
             options.expiration = {
+
                 type: 'EX',
+
                 value: ttlSeconds
+                
             };
         }
 

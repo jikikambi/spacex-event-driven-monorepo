@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { PinoLogger } from 'nestjs-pino';
 import { SseGatewayService } from './sse-gateway.service';
 import { EnrichLaunchEvent, IncomingGatewayEvent } from 'gateway-contracts';
-import { MongoService } from '../../infrastructure/database/mongo/mongo.service';
+import { MongoService } from '../../infrastructure/datastore/mongo/mongo.service';
 
 @Controller('events')
 export class SseController {
@@ -32,8 +32,10 @@ export class SseController {
 
         }
         else {
+            
             // New client: replay recent Redis cache
             await this.gateway.replayCachedEvents(clientId);
+            
         }
 
         req.on('close', () => {
@@ -53,7 +55,7 @@ export class SseController {
             const collection = this.mongoSvc.getCollection<EnrichLaunchEvent>('events');
 
             const events = await collection
-                .find({ createdAt: { $gt: since } })
+                .find({ receivedAt: { $gt: since } })
                 .toArray();
 
             for (const event of events) {

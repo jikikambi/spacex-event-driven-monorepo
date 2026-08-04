@@ -32,5 +32,7 @@ export class EventEnrichmentService {
 
             payload,
         };
+
     }
+    
 }

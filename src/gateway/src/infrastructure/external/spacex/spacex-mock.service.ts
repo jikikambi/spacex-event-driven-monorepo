@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PinoLogger } from "nestjs-pino";
-import launches from '../../../mock-data/launches.json';
 import rockets from '../../../mock-data/rockets.json';
 import payloads from '../../../mock-data/payloads.json';
 import ships from '../../../mock-data/ships.json';
@@ -10,6 +9,7 @@ import { Launch, Launchpad, Payload, Rocket, Ship } from "spacex-types";
 import { RequestMetadataService } from "../../../common/middleware/request-metadata.service";
 import { TelemetryContextService } from "../../../observability/logging/telemetry-context.service";
 import { LaunchMapper, LaunchSchema } from "../../../schemas";
+import { mockLaunches } from "../../../test-utils/spacex.fixtures";
 
 @Injectable()
 export class SpaceXMockService implements ISpaceXProvider {
@@ -113,7 +113,7 @@ export class SpaceXMockService implements ISpaceXProvider {
 
     private loadLaunches(): Map<string, Launch> {
 
-        const validated = launches.map(item => {
+        const validated = mockLaunches.map(item => {
 
             const result = LaunchSchema.safeParse(item);
 
@@ -139,10 +139,15 @@ export class SpaceXMockService implements ISpaceXProvider {
     private logContext(operation: string) {
 
         return {
+            
             correlationId: this.metadataSvc.correlationId,
+
             traceId: this.telctxSvc.traceId,
+
             spanId: this.telctxSvc.spanId,
+
             component: 'spacex',
+
             operation,
         };
     }

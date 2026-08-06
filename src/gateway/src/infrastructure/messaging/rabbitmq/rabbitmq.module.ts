@@ -4,9 +4,12 @@ import { RabbitMQController } from './controllers/rabbitmq.controller';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule], 
+
   controllers: [RabbitMQController],
+
   providers: [RabbitMQService],
+  
   exports: [RabbitMQService],
 })
 export class RabbitMQModule { }

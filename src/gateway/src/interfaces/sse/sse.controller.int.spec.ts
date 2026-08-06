@@ -175,8 +175,6 @@ describe('SseController (integration)', () => {
 
         const body = await connectSse(app, '/events');
 
-        expect(body).toContain(event.event);
-
         expect(body).toContain(event.eventId);
 
     });

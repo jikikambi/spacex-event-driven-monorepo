@@ -66,7 +66,7 @@ export class LaunchBootstrapService implements OnApplicationBootstrap {
                 launchId: launch.id
             },
 
-            "Published launch",
+            "Publishing launch to RabbitMQ",
 
         );
     }

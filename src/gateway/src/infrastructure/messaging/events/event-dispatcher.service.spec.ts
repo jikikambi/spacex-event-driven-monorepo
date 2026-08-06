@@ -121,8 +121,6 @@ describe('EventDispatcherService', () => {
 
         });
 
-
-
         it('logs warning when launch id cannot be resolved', async () => {
 
             identitySvc.getLaunchId.mockReturnValue(undefined);

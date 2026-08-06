@@ -26,11 +26,13 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
     private flushTimer?: NodeJS.Timeout;
 
-     private reconnectTimer?: NodeJS.Timeout;
+    private reconnectTimer?: NodeJS.Timeout;
 
     private flushIntervalMs = 1000;
 
-    private lastPublishAttempt?: Date;   
+    private shuttingDown = false;
+
+    private lastPublishAttempt?: Date;
 
     private readonly eventBuffer: BufferedEvent<IncomingGatewayEvent>[] = [];
 
@@ -166,20 +168,24 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
     async close(): Promise<void> {
 
-        this.reconnecting = false;
+        //this.reconnecting = false;
+
+        this.shuttingDown = true;
 
         if (this.flushTimer) {
 
             clearInterval(this.flushTimer);
 
-             this.flushTimer = undefined;
+            this.flushTimer = undefined;
+
         }
 
         if (this.reconnectTimer) {
-            
+
             clearTimeout(this.reconnectTimer);
-            
+
             this.reconnectTimer = undefined;
+
         }
 
         await this.channel?.close();
@@ -191,6 +197,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         this.connection = null;
 
         this.logger.info('[RabbitMQ] Closed gracefully');
+
     }
 
     private async assertQueues(channel: Channel): Promise<void> {
@@ -262,18 +269,24 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
         this.connection?.on('close', () => {
 
+            if (this.shuttingDown) {
+
+                return;
+
+            }
+
             this.logger.warn('[RabbitMQ] connection closed, reconnecting...');
 
             this.channel = null;
 
             this.connection = null;
 
-            this.reconnectTimer = setTimeout(() =>  
-                {  
+            this.reconnectTimer = setTimeout(() => {
 
-                    this.connect().catch(error => this.logger.error( '[RabbitMQ] reconnect failed', error ) );  
+                this.connect().catch(error => this.logger.error('[RabbitMQ] reconnect failed', error));
 
-                }, 5000);
+            }, 5000);
+            
         });
 
         this.connection?.on('error', (err) => {
@@ -333,7 +346,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
             oldestBufferedMs: oldestBufferedMs,
 
-            message: this.eventBuffer.length > 0            
+            message: this.eventBuffer.length > 0
                 ? `${this.eventBuffer.length} events waiting to be published. Oldest is ${oldestBufferedMs} ms old.`
                 : 'No buffered events.'
         };
@@ -343,5 +356,5 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
         return new Promise((res) => setTimeout(res, ms));
     }
-    
+
 }

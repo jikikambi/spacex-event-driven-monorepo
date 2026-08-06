@@ -3,6 +3,8 @@ import { GatewayLifecycleService } from "./gateway-lifecycle.service";
 
 @Module({
   providers: [GatewayLifecycleService],
+
   exports: [GatewayLifecycleService],
+  
 })
 export class BootstrapModule {}

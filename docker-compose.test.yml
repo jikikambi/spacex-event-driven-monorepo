@@ -1,0 +1,29 @@
+services:
+
+  mongo-test:
+    image: mongo:8
+    container_name: spacex_mongodb_test
+    ports:
+      - "37017:27017"
+    networks:
+      - gateway-test
+
+  redis-test:
+    image: redis:7.2-alpine
+    container_name: spacex_redis_test
+    ports:
+      - "36379:6379"
+    networks:
+      - gateway-test
+
+  rabbit-test:
+    image: rabbitmq:4-management-alpine
+    container_name: spacex_rabbitmq_test
+    ports:
+      - "35672:5672"
+      - "35673:15672"
+    networks:
+      - gateway-test
+
+networks:
+  gateway-test:

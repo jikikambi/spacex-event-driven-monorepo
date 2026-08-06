@@ -41,7 +41,7 @@ export class LaunchStore {
 
     public getAll(): readonly LaunchViewModel[] {
 
-        return this.launches;;
+        return this.launches;
 
     }
 

@@ -21,6 +21,7 @@ import { SpaceXModule } from '../infrastructure/external/spacex/spacex.module';
 
 @Module({
   imports: [
+    
     LoggerModule.forRoot({
 
       pinoHttp: {
@@ -32,18 +33,29 @@ import { SpaceXModule } from '../infrastructure/external/spacex/spacex.module';
         transport: process.env.NODE_ENV !== 'production' ? {
 
           target: 'pino-pretty',
+
           options: {
+
             colorize: true,
-            singleLine: true,
+
+            singleLine: true
+
           }
+
         } : undefined,
-        timestamp: pino.stdTimeFunctions.isoTime,
-      },
+
+        timestamp: pino.stdTimeFunctions.isoTime
+
+      }
+
     }),
 
     ConfigModule.forRoot({
+
       isGlobal: true,
-      envFilePath: '.env',
+
+      envFilePath: '.env'
+
     }),
 
     HttpModule, HealthModule, ObservabilityModule, MetricsModule, RabbitMQModule, EventsModule, RedisModule, SpaceXModule],
@@ -53,9 +65,14 @@ import { SpaceXModule } from '../infrastructure/external/spacex/spacex.module';
   providers: [AppService, LaunchBootstrapService, GatewayLifecycleService, HttpExceptionFilter, OpenTelemetryService,
     {
       provide: APP_INTERCEPTOR,
-      useClass: MetricsInterceptor,
-    }],
-    
+
+      useClass: MetricsInterceptor
+
+    }
+  
+  ],
+
   exports: []
+
 })
 export class AppModule { }

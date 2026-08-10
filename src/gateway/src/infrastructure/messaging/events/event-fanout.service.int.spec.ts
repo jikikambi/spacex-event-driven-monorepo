@@ -178,9 +178,9 @@ describe('EventFanoutService (integration)', () => {
 
             const client = (bucket: string[]) => ({
 
-                setHeader() { },
+                setHeader(): undefined { return undefined; },
 
-                flushHeaders() { },
+                flushHeaders(): undefined { return undefined; },
 
                 write(payload: string) {
 

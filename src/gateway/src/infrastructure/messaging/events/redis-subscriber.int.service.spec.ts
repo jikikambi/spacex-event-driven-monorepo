@@ -111,6 +111,8 @@ describe('RedisSubscriberService (integration)', () => {
 
         }).compile();
 
+        logger = module.get(PinoLogger);
+
         redis = module.get(RedisService);
 
         fanoutSvc = module.get(EventFanoutService);

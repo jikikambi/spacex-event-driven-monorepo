@@ -113,9 +113,9 @@ export class SseGatewayService {
             }
             catch (error) {
 
-                error = error instanceof Error ? error.message ?? error : undefined
+                const errorMessage = error instanceof Error ? error.message ?? error : undefined
 
-                this.logger.error({ clientId, error }, '[SSE] Failed to write event');
+                this.logger.error({ clientId, error: errorMessage }, '[SSE] Failed to write event');
 
             }
 

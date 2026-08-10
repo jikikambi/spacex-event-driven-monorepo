@@ -9,7 +9,7 @@ pr:
       - nestjs-migration
 
 pool:
-  vmImage: ubuntu-latest
+  name: spacex
 
 variables:
   NODE_VERSION: '22.x'

@@ -52,7 +52,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: Pa55Word
     volumes:
-      - spacex_mongo-data:/data/db    
+      - spacex_mongo_data:/data/db    
 
   postgres:
     image: postgres:16-alpine
@@ -155,5 +155,5 @@ services:
 volumes:
  spacex_redis_data:      
  spacex_rabbitmq_data: 
- spacex_mongo-data:
+ spacex_mongo_data:
  spacex_postgres_data:

@@ -1,0 +1,61 @@
+```yaml
+name: CI
+
+on:
+  push:
+    branches:
+      - nestjs-migration
+      #- main
+  pull_request:
+    branches:
+      - nestjs-migration
+      #- main
+
+jobs:
+  gateway-ci:
+    name: Gateway CI
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start test infrastructure
+        run: docker compose -f docker-compose.test.yml up -d
+
+      - name: Wait for test infrastructure
+        run: |
+          echo "Waiting for MongoDB..."
+          timeout 60 bash -c 'until docker exec spacex_mongodb_test mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done'
+
+          echo "Waiting for Redis..."
+          timeout 60 bash -c 'until docker exec spacex_redis_test redis-cli ping | grep -q PONG; do sleep 2; done'
+
+          echo "Waiting for RabbitMQ..."
+          timeout 60 bash -c 'until docker exec spacex_rabbitmq_test rabbitmq-diagnostics -q ping > /dev/null 2>&1; do sleep 2; done'
+
+          echo "Test infrastructure is ready."
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test gateway
+        run: npm run test:gateway -- --runInBand
+
+      - name: Build
+        run: npm run build
+
+      - name: Shutdown test infrastructure
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
+```

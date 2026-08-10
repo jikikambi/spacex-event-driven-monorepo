@@ -101,17 +101,11 @@ describe('SseController (integration)', () => {
 
         await app.init();
 
-        //await app.listen(0);
-
         redis = module.get(RedisService);
 
         mongo = module.get(MongoService);
 
         gateway = module.get(SseGatewayService);
-
-        //await redis.onModuleInit();
-
-        //await mongo.onModuleInit();
 
         await app.listen(0);
 
@@ -123,10 +117,6 @@ describe('SseController (integration)', () => {
 
         await mongo.getDatabase().collection('events').deleteMany({});
 
-        //await redis.onModuleDestroy();
-
-        //await mongo.onModuleDestroy();
-
         await app.close();
 
     });
@@ -134,10 +124,6 @@ describe('SseController (integration)', () => {
     afterAll(async () => {
 
         await app.close();
-
-        //await redisContainer.stop();
-
-        //await mongoContainer.stop();
 
     });
 

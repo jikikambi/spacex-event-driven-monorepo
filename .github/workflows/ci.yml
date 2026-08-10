@@ -1,15 +1,12 @@
-```yaml
 name: CI
 
 on:
   push:
     branches:
       - nestjs-migration
-      #- main
   pull_request:
     branches:
       - nestjs-migration
-      #- main
 
 jobs:
   gateway-ci:
@@ -58,4 +55,3 @@ jobs:
       - name: Shutdown test infrastructure
         if: always()
         run: docker compose -f docker-compose.test.yml down -v
-```

@@ -54,8 +54,6 @@ describe('Gateway E2E - Happy Path', () => {
 
         );
 
-        console.log('PUBLISHED LAUNCH_RECEIVED');
-
         mongo = app.get(MongoService);
 
         redis = app.get(RedisService);

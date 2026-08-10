@@ -132,8 +132,6 @@ describe('EventPublisherService (integration)', () => {
 
     it('should connect to redis', async () => {
 
-        await redisService.onModuleInit();
-
         await waitFor(() => expect(redisService.isConnected()).toBe(true));
 
     });

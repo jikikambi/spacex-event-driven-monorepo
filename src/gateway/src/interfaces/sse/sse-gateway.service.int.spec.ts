@@ -2,13 +2,11 @@ import { Test } from '@nestjs/testing';
 import { GenericContainer, StartedTestContainer } from 'testcontainers';
 import { ConfigService } from '@nestjs/config';
 import { PinoLogger } from 'nestjs-pino';
-import { randomUUID } from 'crypto';
 
 import { SseGatewayService } from './sse-gateway.service';
 
-import { getLaunchFixture } from '../../test-utils/spacex.fixtures';
 import { RedisService } from '../../infrastructure/datastore/redis/redis.service';
-import { EnrichLaunchEvent, GatewayEvents } from 'gateway-contracts';
+import { GatewayEvents } from 'gateway-contracts';
 import { EnrichedLaunchBuilder } from '../../test-utils/enriched-launch.builder';
 
 describe('SseGatewayService (integration)', () => {

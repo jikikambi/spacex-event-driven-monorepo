@@ -54,31 +54,71 @@ steps:
 
   - script: |
       docker compose -f docker-compose.test.yml up -d
-    displayName: 'Start test infrastructure'
+    displayName: 'Start test infrastructure'  
 
-  - script: |
-      set -e
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
 
-      echo "Waiting for MongoDB..."
-      timeout 60 bash -c \
-        'until docker exec spacex_mongodb_test mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done'
+      Write-Host "Waiting for MongoDB..."
+      $mongoReady = $false
 
-      echo "MongoDB is ready."
+      for ($i = 0; $i -lt 30; $i++) {
+          docker exec spacex_mongodb_test mongosh --eval "db.adminCommand('ping')" 2>$null
+          if ($LASTEXITCODE -eq 0) {
+              $mongoReady = $true
+              break
+          }
 
-      echo "Waiting for Redis..."
-      timeout 60 bash -c \
-        'until docker exec spacex_redis_test redis-cli ping | grep -q PONG; do sleep 2; done'
+          Start-Sleep -Seconds 2
+        }
 
-      echo "Redis is ready."
+      if (-not $mongoReady) {
+          throw "MongoDB did not become ready within 60 seconds."
+      }
 
-      echo "Waiting for RabbitMQ..."
-      timeout 60 bash -c \
-        'until docker exec spacex_rabbitmq_test rabbitmq-diagnostics -q ping > /dev/null 2>&1; do sleep 2; done'
+      Write-Host "MongoDB is ready."
 
-      echo "RabbitMQ is ready."
+      Write-Host "Waiting for Redis..."
+      $redisReady = $false
 
-      echo "Test infrastructure is ready."
-    displayName: 'Wait for test infrastructure'
+      for ($i = 0; $i -lt 30; $i++) {
+          $result = docker exec spacex_redis_test redis-cli ping 2>$null
+
+          if ($LASTEXITCODE -eq 0 -and $result -match 'PONG') {
+              $redisReady = $true
+              break
+          }
+
+          Start-Sleep -Seconds 2
+      }
+
+      if (-not $redisReady) {
+          throw "Redis did not become ready within 60 seconds."
+      }
+
+      Write-Host "Redis is ready."
+
+      Write-Host "Waiting for RabbitMQ..."
+      $rabbitReady = $false
+
+      for ($i = 0; $i -lt 30; $i++) {
+          docker exec spacex_rabbitmq_test rabbitmq-diagnostics -q ping 2>$null
+
+          if ($LASTEXITCODE -eq 0) {
+              $rabbitReady = $true
+              break
+          }
+
+          Start-Sleep -Seconds 2
+      }
+
+      if (-not $rabbitReady) {
+          throw "RabbitMQ did not become ready within 60 seconds."
+      }
+
+      Write-Host "RabbitMQ is ready."
+      Write-Host "Test infrastructure is ready."
+    displayName: Wait for test infrastructure  
 
   - script: |
       corepack npm@$(NPM_VERSION) run lint

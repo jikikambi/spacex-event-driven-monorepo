@@ -14,6 +14,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      NODE_ENV: test
+      SPACEX_API: http://host/v4
+      SPACEX_PROVIDER: mock
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

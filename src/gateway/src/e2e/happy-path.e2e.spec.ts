@@ -74,7 +74,7 @@ describe('Gateway E2E - Happy Path', () => {
 
     afterAll(async () => {
 
-        await app.close();
+        await app?.close();
 
     });
 

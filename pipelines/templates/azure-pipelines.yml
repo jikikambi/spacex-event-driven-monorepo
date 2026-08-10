@@ -16,61 +16,118 @@ variables:
   NPM_VERSION: '10.9.8'
 
   NODE_ENV: test
-  MONGO_URL: mongodb://localhost:37017
-  MONGO_DB_NAME: spacex_test
-  REDIS_URL: redis://localhost:36379
-  RABBITMQ_URL: amqp://localhost:35672
-  RABBITMQ_QUEUE: spacex-events
-  SPACEX_API: http://host/v4
+  MONGO_URL: 'mongodb://localhost:37017'
+  MONGO_DB_NAME: 'spacex_test'
+  REDIS_URL: 'redis://localhost:36379'
+  RABBITMQ_URL: 'amqp://localhost:35672'
+  RABBITMQ_QUEUE: 'spacex-events'
+  SPACEX_API: 'http://host/v4'
   SPACEX_PROVIDER: mock
 
 steps:
 
+  # ------------------------------------------------------------
+  # Checkout
+  # ------------------------------------------------------------
+
   - checkout: self
     clean: true
     displayName: 'Checkout repository'
+
+  # ------------------------------------------------------------
+  # Node.js
+  # ------------------------------------------------------------
 
   - task: NodeTool@0
     displayName: 'Setup Node.js $(NODE_VERSION)'
     inputs:
       versionSpec: '$(NODE_VERSION)'
 
-  - script: |
-      corepack enable
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
 
-      echo "Node version:"
+      Write-Host "Node version:"
       node --version
 
-      echo "npm version:"
-      corepack npm@$(NPM_VERSION) --version
+      Write-Host "Enabling Corepack..."
+      corepack enable
 
-      echo "Expected npm version:"
-      echo "$(NPM_VERSION)"
+      Write-Host "Preparing npm $(NPM_VERSION)..."
+      corepack prepare "npm@$(NPM_VERSION)" --activate
+
+      Write-Host "Active npm version:"
+      npm --version
+
+      $actual = npm --version
+      $expected = "$(NPM_VERSION)"
+
+      if ($actual -ne $expected) {
+          throw "Expected npm $expected but found npm $actual."
+      }
+
+      Write-Host "Node.js and npm versions are correct."
+    workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Configure and verify Node.js/npm'
 
-  - script: |
-      corepack npm@$(NPM_VERSION) ci
+  # ------------------------------------------------------------
+  # Dependencies
+  # ------------------------------------------------------------
+
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
+
+      Write-Host "Installing dependencies with npm ci..."
+      npm ci
+
+      Write-Host "Dependencies installed successfully."
+    workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Install dependencies with npm ci'
 
-  - script: |
+  # ------------------------------------------------------------
+  # Test infrastructure
+  # ------------------------------------------------------------
+
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
+
+      Write-Host "Cleaning up any stale test infrastructure..."
+
+      docker compose -f docker-compose.test.yml down -v --remove-orphans 2>$null
+
+      Write-Host "Starting test infrastructure..."
+
       docker compose -f docker-compose.test.yml up -d
-    displayName: 'Start test infrastructure'  
+
+      if ($LASTEXITCODE -ne 0) {
+          throw "Failed to start test infrastructure."
+      }
+
+      Write-Host "Test infrastructure started."
+    workingDirectory: '$(Build.SourcesDirectory)'
+    displayName: 'Start test infrastructure'
+
+  # ------------------------------------------------------------
+  # Wait for MongoDB / Redis / RabbitMQ
+  # ------------------------------------------------------------
 
   - powershell: |
       $ErrorActionPreference = 'Stop'
 
       Write-Host "Waiting for MongoDB..."
+
       $mongoReady = $false
 
       for ($i = 0; $i -lt 30; $i++) {
-          docker exec spacex_mongodb_test mongosh --eval "db.adminCommand('ping')" 2>$null
+
+          docker exec spacex_mongodb_test mongosh --quiet --eval "db.adminCommand('ping')" 2>$null
+
           if ($LASTEXITCODE -eq 0) {
               $mongoReady = $true
               break
           }
 
           Start-Sleep -Seconds 2
-        }
+      }
 
       if (-not $mongoReady) {
           throw "MongoDB did not become ready within 60 seconds."
@@ -78,10 +135,13 @@ steps:
 
       Write-Host "MongoDB is ready."
 
+
       Write-Host "Waiting for Redis..."
+
       $redisReady = $false
 
       for ($i = 0; $i -lt 30; $i++) {
+
           $result = docker exec spacex_redis_test redis-cli ping 2>$null
 
           if ($LASTEXITCODE -eq 0 -and $result -match 'PONG') {
@@ -98,10 +158,13 @@ steps:
 
       Write-Host "Redis is ready."
 
+
       Write-Host "Waiting for RabbitMQ..."
+
       $rabbitReady = $false
 
       for ($i = 0; $i -lt 30; $i++) {
+
           docker exec spacex_rabbitmq_test rabbitmq-diagnostics -q ping 2>$null
 
           if ($LASTEXITCODE -eq 0) {
@@ -117,36 +180,74 @@ steps:
       }
 
       Write-Host "RabbitMQ is ready."
-      Write-Host "Test infrastructure is ready."
-    displayName: Wait for test infrastructure  
 
-  - script: |
-      corepack npm@$(NPM_VERSION) run lint
+      Write-Host "Test infrastructure is ready."
+    workingDirectory: '$(Build.SourcesDirectory)'
+    displayName: 'Wait for test infrastructure'
+
+  # ------------------------------------------------------------
+  # Lint
+  # ------------------------------------------------------------
+
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
+
+      npm run lint
+    workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Lint'
 
-  - script: |
-      corepack npm@$(NPM_VERSION) exec -- \
-        node -e "console.log({
-          NODE_ENV: process.env.NODE_ENV,
-          MONGO_URL: process.env.MONGO_URL,
-          MONGO_DB_NAME: process.env.MONGO_DB_NAME,
-          REDIS_URL: process.env.REDIS_URL,
-          RABBITMQ_URL: process.env.RABBITMQ_URL,
-          RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE,
-          SPACEX_API: process.env.SPACEX_API,
-          SPACEX_PROVIDER: process.env.SPACEX_PROVIDER
-        })"
+  # ------------------------------------------------------------
+  # Verify environment
+  # ------------------------------------------------------------
+
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
+
+      node -e "console.log({
+        NODE_ENV: process.env.NODE_ENV,
+        MONGO_URL: process.env.MONGO_URL,
+        MONGO_DB_NAME: process.env.MONGO_DB_NAME,
+        REDIS_URL: process.env.REDIS_URL,
+        RABBITMQ_URL: process.env.RABBITMQ_URL,
+        RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE,
+        SPACEX_API: process.env.SPACEX_API,
+        SPACEX_PROVIDER: process.env.SPACEX_PROVIDER
+      })"
+    workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Check test environment'
 
-  - script: |
-      corepack npm@$(NPM_VERSION) run test:gateway -- --runInBand
+  # ------------------------------------------------------------
+  # Gateway tests
+  # ------------------------------------------------------------
+
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
+
+      npm run test:gateway -- --runInBand
+    workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Test gateway'
 
-  - script: |
-      corepack npm@$(NPM_VERSION) run build
+  # ------------------------------------------------------------
+  # Build
+  # ------------------------------------------------------------
+
+  - powershell: |
+      $ErrorActionPreference = 'Stop'
+
+      npm run build
+    workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Build'
 
-  - script: |
-      docker compose -f docker-compose.test.yml down -v
+  # ------------------------------------------------------------
+  # Cleanup
+  # ------------------------------------------------------------
+
+  - powershell: |
+      Write-Host "Shutting down test infrastructure..."
+
+      docker compose -f docker-compose.test.yml down -v --remove-orphans
+
+      Write-Host "Test infrastructure shut down."
+    workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Shutdown test infrastructure'
     condition: always()

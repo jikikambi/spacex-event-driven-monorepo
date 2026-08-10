@@ -160,3 +160,5 @@ __screenshots__/
 
 # dev testing file
 dev.md
+git_workflow.md
+ci_lint.md

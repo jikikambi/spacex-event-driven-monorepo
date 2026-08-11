@@ -7,10 +7,25 @@ import { MongoService } from '../infrastructure/datastore/mongo/mongo.service';
 import { RedisService } from '../infrastructure/datastore/redis/redis.service';
 import { RabbitMQService } from '../infrastructure/messaging/rabbitmq/rabbitmq.service';
 import { getLaunchFixture } from '../test-utils/spacex.fixtures';
+import { GenericContainer, StartedTestContainer } from 'testcontainers';
+import { ConfigService } from '@nestjs/config';
+import { QUEUE_NAMES, QUEUE_TEST_NAMES } from '../common/constants/queue.constants';
 
 describe('Gateway E2E - Happy Path', () => {
 
     let app: INestApplication;
+
+    let mongoContainer: StartedTestContainer;
+
+    let redisContainer: StartedTestContainer;
+
+    let rabbitContainer: StartedTestContainer;
+
+    let mongoUrl: string;
+
+    let redisUrl: string;
+
+    let rabbitUrl: string;
 
     let mongo: MongoService;
 
@@ -18,11 +33,57 @@ describe('Gateway E2E - Happy Path', () => {
 
     beforeAll(async () => {
 
+        mongoContainer = await new GenericContainer('mongo:7').withExposedPorts(27017).start();
+
+        redisContainer = await new GenericContainer('redis:7.2-alpine').withExposedPorts(6379).start();
+
+        rabbitContainer = await new GenericContainer('rabbitmq:4-management-alpine').withExposedPorts(5672).start();
+
+        mongoUrl = `mongodb://${mongoContainer.getHost()}:${mongoContainer.getMappedPort(27017)}`;
+
+        redisUrl = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
+
+        rabbitUrl = `amqp://${rabbitContainer.getHost()}:${rabbitContainer.getMappedPort(5672)}`;
+
+    }, 120000);
+
+    beforeEach(async () => {
+
         const moduleRef = await Test.createTestingModule(
 
             {
 
-                imports: [GatewayE2ETestModule]
+                imports: [GatewayE2ETestModule],
+
+                providers: [
+
+                    {
+                        provide: ConfigService,
+
+                        useValue: {
+
+                            getOrThrow: jest.fn((key: string) => {
+
+                                switch (key) {
+
+                                    case 'MONGO_URL': return mongoUrl;
+
+                                    case 'MONGO_DB_NAME': return 'spacex_test';
+
+                                    case 'REDIS_URL': return redisUrl;
+
+                                    case 'RABBITMQ_URL': return rabbitUrl;
+
+                                    case 'RABBITMQ_QUEUE': return QUEUE_TEST_NAMES.SPACEX_EVENTS;
+
+                                    default: throw new Error(`Missing config ${key}`);
+
+                                }
+
+                            })
+                        }
+                    }
+                ]
 
             }
 
@@ -62,7 +123,7 @@ describe('Gateway E2E - Happy Path', () => {
 
     });
 
-    beforeEach(async () => {
+    afterEach(async () => {
 
         await mongo.getDatabase().dropDatabase();
 

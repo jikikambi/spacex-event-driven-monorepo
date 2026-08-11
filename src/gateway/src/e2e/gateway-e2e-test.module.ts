@@ -43,9 +43,9 @@ import { HttpModule } from "@nestjs/axios";
         ConfigModule.forRoot({
 
             isGlobal: true,
-
-            envFilePath: '.env.test'
-
+            
+            ignoreEnvFile: true,
+            
         }),
 
 

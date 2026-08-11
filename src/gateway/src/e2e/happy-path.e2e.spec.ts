@@ -31,6 +31,11 @@ describe('Gateway E2E - Happy Path', () => {
 
     let redis: RedisService;
 
+    let cfgSvc: ConfigService;
+
+    const originalEnv = process.env;
+
+
     beforeAll(async () => {
 
         mongoContainer = await new GenericContainer('mongo:7').withExposedPorts(27017).start();
@@ -49,7 +54,9 @@ describe('Gateway E2E - Happy Path', () => {
 
     beforeEach(async () => {
 
-        const config = {
+        process.env = {
+
+            ...originalEnv,
 
             NODE_ENV: 'test',
 
@@ -61,32 +68,19 @@ describe('Gateway E2E - Happy Path', () => {
 
             RABBITMQ_URL: rabbitUrl,
 
-            RABBITMQ_QUEUE: QUEUE_TEST_NAMES.SPACEX_EVENTS
+            RABBITMQ_QUEUE: QUEUE_TEST_NAMES.SPACEX_EVENTS,
+
         };
+
+        const cfg = {
+            MONGO_URL: mongoUrl,
+        }
 
         const moduleRef = await Test.createTestingModule(
 
             {
 
-                imports: [GatewayE2ETestModule],
-
-                providers: [
-
-                    {
-                        provide: ConfigService,
-
-                        useValue: {
-
-                            getOrThrow: jest.fn(<T>(key: string) => {
-
-                                if (!(key in config)) { throw new Error(`Missing config: ${key}`); }
-
-                                return config[key as keyof typeof config] as T;
-
-                            })
-                        }
-                    }
-                ]
+                imports: [GatewayE2ETestModule]
 
             }
 

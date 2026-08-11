@@ -129,6 +129,8 @@ steps:
   - powershell: |
       $ErrorActionPreference = 'Stop'
 
+      throw "Intentional failure: testing Azure PR build validation"
+
       npm run build
     workingDirectory: '$(Build.SourcesDirectory)'
     displayName: 'Build' 

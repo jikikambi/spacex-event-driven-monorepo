@@ -160,9 +160,9 @@ __screenshots__/
 
 # dev testing file
 dev.md
-git_workflow.md
-ci_lint.md
-az_devops.md
 the_path.md
-ci-cd-foundations.md
+git_workflow.md
 corepack_npm.md
+ci-cd-foundations.md
+azure_self_hosted_agent.md
+az_devops.md

@@ -17,7 +17,7 @@ jobs:
     env:
       NODE_ENV: test
       #MONGO_URL: mongodb://localhost:37017
-      MONGO_DB_NAME: spacex-events-test
+      #MONGO_DB_NAME: spacex-events-test
       #REDIS_URL: redis://localhost:36379
       #RABBITMQ_URL: amqp://localhost:35672
       #RABBITMQ_QUEUE: spacex-events

@@ -49,6 +49,21 @@ describe('Gateway E2E - Happy Path', () => {
 
     beforeEach(async () => {
 
+        const config = {
+
+            NODE_ENV: 'test',
+
+            MONGO_URL: mongoUrl,
+
+            MONGO_DB_NAME: 'spacex_test',
+
+            REDIS_URL: redisUrl,
+
+            RABBITMQ_URL: rabbitUrl,
+
+            RABBITMQ_QUEUE: QUEUE_TEST_NAMES.SPACEX_EVENTS
+        };
+
         const moduleRef = await Test.createTestingModule(
 
             {
@@ -62,23 +77,11 @@ describe('Gateway E2E - Happy Path', () => {
 
                         useValue: {
 
-                            getOrThrow: jest.fn((key: string) => {
+                            getOrThrow: jest.fn(<T>(key: string) => {
 
-                                switch (key) {
+                                if (!(key in config)) { throw new Error(`Missing config: ${key}`); }
 
-                                    case 'MONGO_URL': return mongoUrl;
-
-                                    case 'MONGO_DB_NAME': return 'spacex_test';
-
-                                    case 'REDIS_URL': return redisUrl;
-
-                                    case 'RABBITMQ_URL': return rabbitUrl;
-
-                                    case 'RABBITMQ_QUEUE': return QUEUE_TEST_NAMES.SPACEX_EVENTS;
-
-                                    default: throw new Error(`Missing config ${key}`);
-
-                                }
+                                return config[key as keyof typeof config] as T;
 
                             })
                         }

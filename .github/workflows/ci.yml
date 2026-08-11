@@ -16,11 +16,6 @@ jobs:
 
     env:
       NODE_ENV: test
-      #MONGO_URL: mongodb://localhost:37017
-      #MONGO_DB_NAME: spacex-events-test
-      #REDIS_URL: redis://localhost:36379
-      #RABBITMQ_URL: amqp://localhost:35672
-      #RABBITMQ_QUEUE: spacex-events
       SPACEX_API: http://host/v4
       SPACEX_PROVIDER: mock
 
@@ -41,23 +36,7 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      # - name: Start test infrastructure
-      #   run: docker compose -f docker-compose.test.yml up -d
-
-      # - name: Wait for test infrastructure
-      #   run: |
-      #     echo "Waiting for MongoDB..."
-      #     timeout 60 bash -c 'until docker exec spacex_mongodb_test mongosh --eval "db.adminCommand(\"ping\")" > /dev/null 2>&1; do sleep 2; done'
-
-      #     echo "Waiting for Redis..."
-      #     timeout 60 bash -c 'until docker exec spacex_redis_test redis-cli ping | grep -q PONG; do sleep 2; done'
-
-      #     echo "Waiting for RabbitMQ..."
-      #     timeout 60 bash -c 'until docker exec spacex_rabbitmq_test rabbitmq-diagnostics -q ping > /dev/null 2>&1; do sleep 2; done'
-
-      #     echo "Test infrastructure is ready."
-
+     
       - name: Lint
         run: npm run lint
 
@@ -65,22 +44,9 @@ jobs:
         run: | 
           node -e "console.log({ 
                    NODE_ENV: process.env.NODE_ENV, 
-                   MONGO_DB_NAME: process.env.MONGO_DB_NAME, 
                    SPACEX_API: process.env.SPACEX_API, 
                    SPACEX_PROVIDER: process.env.SPACEX_PROVIDER 
-                   })"
-
-        # run: |
-        #   node -e "console.log({
-        #     NODE_ENV: process.env.NODE_ENV,
-        #     MONGO_URL: process.env.MONGO_URL,
-        #     MONGO_DB_NAME: process.env.MONGO_DB_NAME,
-        #     REDIS_URL: process.env.REDIS_URL,
-        #     RABBITMQ_URL: process.env.RABBITMQ_URL,
-        #     RABBITMQ_QUEUE: process.env.RABBITMQ_QUEUE,
-        #     SPACEX_API: process.env.SPACEX_API,
-        #     SPACEX_PROVIDER: process.env.SPACEX_PROVIDER
-        #   })"          
+                   })"           
 
       - name: Test gateway
         run: npm run test:gateway -- --runInBand

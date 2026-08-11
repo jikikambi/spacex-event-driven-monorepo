@@ -48,7 +48,6 @@ import { HttpModule } from "@nestjs/axios";
             
         }),
 
-
         HttpModule, EventsModule, RabbitMQModule, RedisModule, SpaceXModule
 
     ],

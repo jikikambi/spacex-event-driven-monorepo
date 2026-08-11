@@ -31,10 +31,7 @@ describe('Gateway E2E - Happy Path', () => {
 
     let redis: RedisService;
 
-    let cfgSvc: ConfigService;
-
     const originalEnv = process.env;
-
 
     beforeAll(async () => {
 
@@ -71,10 +68,6 @@ describe('Gateway E2E - Happy Path', () => {
             RABBITMQ_QUEUE: QUEUE_TEST_NAMES.SPACEX_EVENTS,
 
         };
-
-        const cfg = {
-            MONGO_URL: mongoUrl,
-        }
 
         const moduleRef = await Test.createTestingModule(
 
